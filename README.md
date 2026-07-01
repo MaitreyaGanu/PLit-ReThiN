@@ -70,24 +70,78 @@ Correlation is 0 when a gene's rate is constant across cells (pure Poisson noise
 ## Repository Structure
 
 ```
-.
-├── R/
-│   ├── methods/
-│   │   ├── PLit.R
-│   │   └── ReThiN.R
-│   ├── baselines/              # scran HVG, Seurat VST, Pearson residuals, scry Deviance, M3Drop
-│   ├── benchmarks/
-│   │   ├── BaronPancreas.R
-│   │   ├── TianCellBench.R
-│   │   ├── Zhengmix4eq.R
-│   │   ├── Zhengmix8eq.R
-│   │   ├── SegerstolpePancreas.R
-│   │   ├── DarmanisBrain.R
-│   │   └── ZeiselBrain.R
-│   └── stats/
-│       └── CrossDatasetStats.R  # Iman-Davenport, Quade, Holm-corrected Wilcoxon
-├── figures/                     # per-dataset ARI/NMI plots
-├── paper/                       # LaTeX source (FeatureSelectors.tex)
+PLit-ReThiN/
+├── BaronPancreas/
+│   ├── BaronPancreas.R
+│   ├── benchmark_summary_BaronPancreas.csv
+│   ├── fig_ARI_BaronPancreas.pdf
+│   ├── fig_NMI_BaronPancreas.pdf
+│   ├── fig_Runtime_BaronPancreas.pdf
+│   ├── raw_results_BaronPancreas.csv
+│   ├── runtime_BaronPancreas.csv
+│   └── session_info_BaronPancreas.txt
+│
+├── DarmanisHumanBrain/
+│   ├── DarmanisBrain.R
+│   ├── benchmark_summary_DarmanisBrain.csv
+│   ├── fig_ARI_DarmanisBrain.pdf
+│   ├── fig_NMI_DarmanisBrain.pdf
+│   ├── fig_Runtime_DarmanisBrain.pdf
+│   ├── raw_results_DarmanisBrain.csv
+│   ├── runtime_DarmanisBrain.csv
+│   └── session_info_DarmanisBrain.txt
+│
+├── SegerstolpePancreas/
+│   ├── SegerstolpePancreas.R
+│   ├── benchmark_summary_SegerstolpePancreas.csv
+│   ├── fig_ARI_SegerstolpePancreas.pdf
+│   ├── fig_NMI_SegerstolpePancreas.pdf
+│   ├── fig_Runtime_SegerstolpePancreas.pdf
+│   ├── raw_results_SegerstolpePancreas.csv
+│   ├── runtime_SegerstolpePancreas.csv
+│   └── session_info_SegerstolpePancreas.txt
+│
+├── TianCellBench/
+│   ├── TianCellBench.R
+│   ├── benchmark_summary_TianCellBench.csv
+│   ├── fig_ARI_TianCellBench.pdf
+│   ├── fig_NMI_TianCellBench.pdf
+│   ├── fig_Runtime_TianCellBench.pdf
+│   ├── raw_results_TianCellBench.csv
+│   ├── runtime_TianCellBench.csv
+│   └── session_info_TianCellBench.txt
+│
+├── ZeiselBrain/
+│   ├── ZeiselBrain.R
+│   ├── benchmark_summary_ZeiselBrain.csv
+│   ├── fig_ARI_ZeiselBrain.pdf
+│   ├── fig_NMI_ZeiselBrain.pdf
+│   ├── fig_Runtime_ZeiselBrain.pdf
+│   ├── raw_results_ZeiselBrain.csv
+│   ├── runtime_ZeiselBrain.csv
+│   └── session_info_ZeiselBrain.txt
+│
+├── ZhengMix4eq/
+│   ├── ZhengMix4eq.R
+│   ├── benchmark_summary_ZhengMix4eq.csv
+│   ├── fig_ARI_ZhengMix4eq.pdf
+│   ├── fig_NMI_ZhengMix4eq.pdf
+│   ├── fig_Runtime_ZhengMix4eq.pdf
+│   ├── raw_results_ZhengMix4eq.csv
+│   ├── runtime_ZhengMix4eq.csv
+│   └── session_info_ZhengMix4eq.txt
+│
+├── ZhengMix8eq/
+│   ├── ZhengMix8eq.R
+│   ├── benchmark_summary_ZhengPBMC.csv
+│   ├── fig_ARI_ZhengPBMC.pdf
+│   ├── fig_NMI_ZhengPBMC.pdf
+│   ├── fig_Runtime_ZhengPBMC.pdf
+│   ├── raw_results_ZhengPBMC.csv
+│   ├── runtime_ZhengPBMC.csv
+│   └── session_info_ZhengPBMC.txt
+│
+├── LICENSE
 └── README.md
 ```
 
