@@ -157,16 +157,6 @@ PLit-ReThiN/
 
 ---
 
-## Usage
-
-```r
-source("R/methods/PLit.R")
-source("R/methods/ReThiN.R")
-
-plit_ranks   <- PLit(counts, B = 20)
-rethin_ranks <- ReThiN(counts, n_thin = 5, B = 20)
-```
-
 ## Benchmarking Framework
 
 Identical protocol applied to every dataset/method (no label leakage — ground truth used only for evaluation):
