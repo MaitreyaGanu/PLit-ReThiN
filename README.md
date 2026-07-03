@@ -1,8 +1,8 @@
 # PLit-ReThiN
 
-Two stability-based unsupervised feature selectors for single-cell RNA-seq (scRNA-seq) count data, benchmarked against six established methods across seven annotated datasets.
+Two stability-based and information-theoretic unsupervised feature selectors for single-cell RNA-seq (scRNA-seq) count data, benchmarked against six established methods across seven annotated datasets.
 
-Status: **draft / pre-publication**. Authors and code availability statement to be added.
+Status: **draft / pre-publication**. 
 
 ---
 
@@ -14,7 +14,6 @@ Status: **draft / pre-publication**. Authors and code availability statement to 
   - [ReThiN — Reproducibility via Thinning](#rethin--reproducibility-via-thinning)
 - [Repository Structure](#repository-structure)
 - [Requirements](#requirements)
-- [Usage](#usage)
 - [Benchmarking Framework](#benchmarking-framework)
 - [Datasets](#datasets)
 - [Results Summary](#results-summary)
@@ -257,5 +256,6 @@ SOFTWARE.
 ---
 
 ## Contact
-
+```
 TBD — authors and correspondence to be added.
+```
