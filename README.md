@@ -214,12 +214,6 @@ BiocManager::install(c("scran", "scry", "M3Drop", "Seurat"))
 # Run the benchmarking pipeline
 # (see repository for dataset-specific entry points and the shared subsampling wrapper)
 ```
-
-## Acknowledgements
-
-This work was carried out at IISER Thiruvananthapuram under the guidance of **Dr. Clint P. George** (IIT Goa). It builds directly on the data-thinning framework of Neufeld, Dharamshi, Gao, Witten, and colleagues, the stability-selection framework of Meinshausen & Bühlmann and Shah & Samworth, and the minimum-description-length principle of Rissanen. Benchmark datasets are used courtesy of their original authors and the `DuoClustering2018` benchmark collection.
-
-
 ---
 
 <div align="center">
