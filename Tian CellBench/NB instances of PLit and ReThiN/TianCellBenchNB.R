@@ -1,18 +1,3 @@
-# =============================================================================
-# Feature-selection benchmark  --  Tian 2019 CellBench (10x, 3 cell lines)
-# NEGATIVE-BINOMIAL INSTANCE of PLit and ReThiN (paper Secs 4.1.2 / 4.2.2)
-# Metrics : ARI, NMI   (PCA -> k-means at true K; mean over k-means seeds)
-# FAIRNESS: EVERY method wrapped in the SAME bootstrap (B rounds, identical
-#           resampling + rank-average aggregation) -> symmetric error bars,
-#           no method-specific advantage.  No k-means-seed significance testing
-#           (that is pseudoreplication; cross-method stats run across the 7 datasets).
-# Proposed methods: ReThiN_NB, PLit_NB.
-# Structurally identical to the Poisson script: only the two proposed scorers
-# change (Poisson null -> NB null, mean-dispersion (mu, r) parameterisation,
-# mu_hat = sample mean, r_hat = 1-D profile MLE). Data loading, baselines,
-# bootstrap wrapper, evaluation, aggregation, and figures are unchanged.
-# =============================================================================
-
 # -----------------------------------------------------------------------------
 # 1.  Packages
 # -----------------------------------------------------------------------------
@@ -113,7 +98,7 @@ score_ReThiN_NB <- function(counts, n_thin = 5L) {             # proposed (= SPA
   setNames(rowMeans(rt), rownames(counts))
 }
 
-score_PLit_NB <- function(counts) {                            # proposed (= PCG core: Sj), NB null
+score_PLit_NB <- function(counts) {                           
   n <- ncol(counts); mu <- rowMeans(counts)
   tab <- apply(counts, 1L, function(x) {
     ct <- tabulate(x + 1L); ct <- ct[ct > 0L]
@@ -140,7 +125,7 @@ score_pearson <- function(counts) {                           # Lause analytic P
   setNames(apply(z, 1, var), rownames(counts))
 }
 
-score_scran <- function(counts, sf = NULL) {                  # FIX#2: use the injected (full) size factors, not re-estimated ones
+score_scran <- function(counts, sf = NULL) {                 
   s <- SingleCellExperiment(assays = list(counts = counts))
   if (!is.null(sf)) sizeFactors(s) <- sf
   s <- logNormCounts(s); d <- modelGeneVar(s)
@@ -220,7 +205,6 @@ cat(sprintf("\nAll selectors done. %d (method x seed) rankings.\n\n", length(met
 
 # -----------------------------------------------------------------------------
 # 6.  Evaluation  --  PCA -> k-means (true K) -> ARI + NMI
-#     FIX: ntop = length(top_genes) so runPCA does NOT re-select top-500-by-variance.
 # -----------------------------------------------------------------------------
 cat("-- Evaluation: PCA -> k-means --\n")
 grid <- expand.grid(Method_key = names(methods_ranked), K = TOP_K, stringsAsFactors = FALSE)
@@ -280,9 +264,6 @@ cat("\n================== RUNTIME (seconds) ==================\n")
 print(as.data.frame(runtime_summary), row.names = FALSE)
 write.csv(runtime_summary, "runtime_TianCellBench_NB.csv", row.names = FALSE)
 
-# NOTE: cross-method significance (Friedman + post-hoc) is computed ACROSS the 7
-#       datasets (one score per method per dataset), NOT on k-means seeds here.
-
 # -----------------------------------------------------------------------------
 # 9.  Figures
 # -----------------------------------------------------------------------------
@@ -311,7 +292,6 @@ p_rt <- runtime_summary |>
 ggsave("fig_ARI_TianCellBench_NB.pdf",     p_ari, width = 8, height = 5)
 ggsave("fig_NMI_TianCellBench_NB.pdf",     p_nmi, width = 8, height = 5)
 ggsave("fig_Runtime_TianCellBench_NB.pdf", p_rt,  width = 6, height = 5)
-
 # -----------------------------------------------------------------------------
 # 10.  Session info
 # -----------------------------------------------------------------------------
