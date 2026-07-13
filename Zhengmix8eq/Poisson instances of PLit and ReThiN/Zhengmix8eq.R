@@ -1,16 +1,10 @@
-# =============================================================================
-# Feature-selection benchmark  --  Zheng 2017 FACS-sorted PBMC (Zhengmix8eq)
-# Metrics : ARI, NMI   (PCA -> k-means at true K; mean over k-means seeds)
-# Proposed methods: ReThiN, PLit.
-# =============================================================================
-
 # -----------------------------------------------------------------------------
 # 1.  Packages
 # -----------------------------------------------------------------------------
 
 cat("Loading packages...\n")
 suppressPackageStartupMessages({
-  library(DuoClustering2018)            # Zheng 2017 FACS-sorted PBMC (Zhengmix)
+  library(DuoClustering2018) 
   library(SingleCellExperiment)
   library(scran); library(scater); library(scry)
   library(Seurat); library(M3Drop)
@@ -22,13 +16,12 @@ pboptions(type = "timer")
 options(ExperimentHub.ask = FALSE)
 
 # -----------------------------------------------------------------------------
-# 2.  Data  (Zheng FACS PBMC: 8 purified populations mixed in known proportions)
+# 2.  Data  ( 8 purified populations mixed in known proportions)
 # -----------------------------------------------------------------------------
-cat("Loading Zheng 2017 FACS-sorted PBMC (Zhengmix8eq)...\n")
-sce        <- suppressMessages(tryCatch(sce_full_Zhengmix8eq(),
-                                        error = function(e) sce_full_Zhengmix4eq()))
+cat("Loading Zhengmix8eq...\n")
+sce         <- suppressMessages(sce_full_Zhengmix8eq())
 counts_mat  <- as.matrix(counts(sce))                         # dense (downstream ops densify anyway)
-true_labels <- factor(colData(sce)$phenoid)                   # FACS-sorted population labels
+true_labels <- factor(colData(sce)$phenoid)                
 n_true_k    <- nlevels(true_labels)
 print(table(true_labels))
 
@@ -168,7 +161,6 @@ cat(sprintf("\nAll selectors done. %d (method x seed) rankings.\n\n", length(met
 
 # -----------------------------------------------------------------------------
 # 6.  Evaluation  --  PCA -> k-means (true K) -> ARI + NMI
-#     ntop = length(top_genes) so runPCA does NOT re-select top-500-by-variance.
 # -----------------------------------------------------------------------------
 cat("-- Evaluation: PCA -> k-means --\n")
 grid <- expand.grid(Method_key = names(methods_ranked), K = TOP_K, stringsAsFactors = FALSE)
@@ -227,10 +219,7 @@ runtime_summary <- runtime_df |>
 cat("\n================== RUNTIME (seconds) ==================\n")
 print(as.data.frame(runtime_summary), row.names = FALSE)
 write.csv(runtime_summary, "runtime_ZhengPBMC.csv", row.names = FALSE)
-
-# NOTE: cross-method significance (Friedman + post-hoc) is computed ACROSS the 7
-#       datasets (one score per method per dataset), NOT on k-means seeds here.
-
+      
 # -----------------------------------------------------------------------------
 # 9.  Figures
 # -----------------------------------------------------------------------------
