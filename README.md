@@ -1,12 +1,14 @@
 <div align="center">
 
-# 🧬 PLit & ReThiN
+# 🧬 PLit & ReThiN 🔬
 
 ### Stability-Based and Information-Theoretic Unsupervised Feature Selection Methods for Single-Cell RNA Sequencing
 
-**Maitreya Sameer Ganu**
-*Indian Institute of Science Education and Research (IISER), Thiruvananthapuram*
-*Advisor: Dr. Clint P. George — Indian Institute of Technology (IIT) Goa*
+**<u>Maitreya Sameer Ganu</u>**<br>
+*Indian Institute of Science Education and Research (IISER), Thiruvananthapuram*<br>
+
+Advisor: **Dr. Clint P. George** <br>
+*Indian Institute of Technology (IIT) Goa*
 
 <br>
 
@@ -18,8 +20,7 @@
 
 <br>
 
-[Abstract](#project-abstract) • [Key Findings](#key-findings-honest-summary) • [Core Hypothesis](#core-hypothesis) • [Methodology](#methodology) • [Theory](#theoretical-results) • [Results](#results) • [Limitations](#limitations) • [Usage](#usage) • [Citation](#citation)
-
+[Abstract](#project-abstract) • [Key Findings](#key-findings-honest-summary) • [Core Hypothesis](#core-hypothesis) • [Methodology](#methodology) • [Theory](#theoretical-results) • [Results](#results) • [Limitations](#limitations) • [Usage](#usage) 
 </div>
 
 ---
