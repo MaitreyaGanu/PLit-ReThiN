@@ -1,18 +1,3 @@
-# =============================================================================
-# Feature-selection benchmark  --  Darmanis Human Brain
-# NEGATIVE-BINOMIAL INSTANCE of PLit and ReThiN (paper Secs 4.1.2 / 4.2.2)
-# Metrics : ARI, NMI   (PCA -> k-means at true K; mean over k-means seeds)
-# FAIRNESS: EVERY method is wrapped in the SAME bootstrap (B rounds, identical
-#           resampling + rank-average aggregation) -> no method-specific advantage,
-#           symmetric error bars.  Cross-method significance is computed across
-#           all benchmarked datasets.
-# Proposed methods: ReThiN_NB, PLit_NB.
-# Structurally identical to the Poisson script: only the two proposed scorers
-# change (Poisson null -> NB null, mean-dispersion (mu, r) parameterisation,
-# mu_hat = sample mean, r_hat = 1-D profile MLE). Data loading, baselines,
-# bootstrap wrapper, evaluation, aggregation, and figures are unchanged.
-# =============================================================================
-
 # -----------------------------------------------------------------------------
 # 1.  Packages
 # -----------------------------------------------------------------------------
@@ -216,8 +201,6 @@ cat(sprintf("\nAll selectors done. %d (method x seed) rankings.\n\n", length(met
 
 # -----------------------------------------------------------------------------
 # 6.  Evaluation  --  PCA -> k-means (true K) -> ARI + NMI
-#     ntop = length(top_genes) so runPCA does NOT silently re-select the
-#     top-500-by-variance genes (its default ntop=500 broke K=1000).
 # -----------------------------------------------------------------------------
 cat("-- Evaluation: PCA -> k-means --\n")
 grid <- expand.grid(Method_key = names(methods_ranked), K = TOP_K, stringsAsFactors = FALSE)
@@ -280,10 +263,6 @@ cat("\n================== RUNTIME (seconds) ==================\n")
 print(as.data.frame(runtime_summary), row.names = FALSE)
 write.csv(runtime_summary, "runtime_DarmanisBrain_NB.csv", row.names = FALSE)
 
-# NOTE: cross-method statistical significance (Friedman + post-hoc) is computed
-#       ACROSS all benchmarked datasets, using one (method, dataset) score each --
-#       not on k-means seeds within a single dataset (that would be pseudoreplication).
-
 # -----------------------------------------------------------------------------
 # 9.  Figures
 # -----------------------------------------------------------------------------
@@ -311,7 +290,6 @@ p_rt <- runtime_summary |>
                     ymax = Runtime_mean_s + Runtime_sd_s), width = 0.3) +
   coord_flip() + theme_bw(base_size = 13) +
   labs(title = "Wall-clock runtime - Darmanis Human Brain (NB instance)", x = NULL, y = "Time (seconds)")
-
 ggsave("fig_ARI_DarmanisBrain_NB.pdf",     p_ari, width = 8, height = 5)
 ggsave("fig_NMI_DarmanisBrain_NB.pdf",     p_nmi, width = 8, height = 5)
 ggsave("fig_Runtime_DarmanisBrain_NB.pdf", p_rt,  width = 6, height = 5)
