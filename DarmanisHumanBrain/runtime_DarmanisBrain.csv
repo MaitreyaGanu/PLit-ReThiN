@@ -1,9 +1,0 @@
-"Method","Runtime_mean_s","Runtime_sd_s"
-"ReThiN",54.38,3.69
-"Seurat_VST",23.85,0.46
-"scran_HVG",15.17,0.5
-"scry_Deviance",13.9,0.34
-"PLit",12.95,1.14
-"M3Drop",11.59,0.74
-"Pearson_Residuals",10.05,0.45
-"Random_Baseline",0.65,0.13
