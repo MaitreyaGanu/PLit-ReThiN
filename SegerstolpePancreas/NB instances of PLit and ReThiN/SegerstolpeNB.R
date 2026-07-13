@@ -1,17 +1,3 @@
-# =============================================================================
-# Feature-selection benchmark  --  Segerstolpe 2016 Human Pancreas
-# NEGATIVE-BINOMIAL INSTANCE of PLit and ReThiN (paper Secs 4.1.2 / 4.2.2)
-# Metrics : ARI, NMI   (PCA -> k-means at true K; mean over k-means seeds)
-# FAIRNESS: EVERY method wrapped in the SAME bootstrap (B rounds, identical
-#           resampling + rank-average aggregation) -> symmetric error bars,
-#           no method-specific advantage.
-# Proposed methods: ReThiN_NB, PLit_NB.
-# Structurally identical to the Poisson script: only the two proposed scorers
-# change (Poisson null -> NB null, mean-dispersion (mu, r) parameterisation,
-# mu_hat = sample mean, r_hat = 1-D profile MLE). Data loading, baselines,
-# bootstrap wrapper, evaluation, aggregation, and figures are unchanged.
-# =============================================================================
-
 # -----------------------------------------------------------------------------
 # 1.  Packages
 # -----------------------------------------------------------------------------
@@ -209,8 +195,6 @@ cat(sprintf("\nAll selectors done. %d (method x seed) rankings.\n\n", length(met
 
 # -----------------------------------------------------------------------------
 # 6.  Evaluation  --  PCA -> k-means (true K) -> ARI + NMI
-#     ntop = length(top_genes) so runPCA does NOT silently re-select the
-#     top-500-by-variance genes (its default ntop=500 broke K=1000).
 # -----------------------------------------------------------------------------
 cat("-- Evaluation: PCA -> k-means --\n")
 grid <- expand.grid(Method_key = names(methods_ranked), K = TOP_K, stringsAsFactors = FALSE)
@@ -272,10 +256,6 @@ runtime_summary <- runtime_df |>
 cat("\n================== RUNTIME (seconds) ==================\n")
 print(as.data.frame(runtime_summary), row.names = FALSE)
 write.csv(runtime_summary, "runtime_SegerstolpePancreas_NB.csv", row.names = FALSE)
-
-# NOTE: cross-method statistical significance (Friedman + post-hoc) is computed
-#       ACROSS the 7 datasets, using one (method, dataset) score each -- not on
-#       k-means seeds within a single dataset (that would be pseudoreplication).
 
 # -----------------------------------------------------------------------------
 # 9.  Figures
