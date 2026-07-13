@@ -1,13 +1,3 @@
-# =============================================================================
-# Feature-selection benchmark  --  Darmanis Human Brain
-# Metrics : ARI, NMI   (PCA -> k-means at true K; mean over k-means seeds)
-# FAIRNESS: EVERY method is wrapped in the SAME bootstrap (B rounds, identical
-#           resampling + rank-average aggregation) -> no method-specific advantage,
-#           symmetric error bars.  Cross-method significance is computed across
-#           all benchmarked datasets.
-# Proposed methods: ReThiN, PLit.
-# =============================================================================
-
 # -----------------------------------------------------------------------------
 # 1.  Packages
 # -----------------------------------------------------------------------------
@@ -182,8 +172,6 @@ cat(sprintf("\nAll selectors done. %d (method x seed) rankings.\n\n", length(met
 
 # -----------------------------------------------------------------------------
 # 6.  Evaluation  --  PCA -> k-means (true K) -> ARI + NMI
-#     ntop = length(top_genes) so runPCA does NOT silently re-select the
-#     top-500-by-variance genes (its default ntop=500 broke K=1000).
 # -----------------------------------------------------------------------------
 cat("-- Evaluation: PCA -> k-means --\n")
 grid <- expand.grid(Method_key = names(methods_ranked), K = TOP_K, stringsAsFactors = FALSE)
@@ -245,10 +233,6 @@ runtime_summary <- runtime_df |>
 cat("\n================== RUNTIME (seconds) ==================\n")
 print(as.data.frame(runtime_summary), row.names = FALSE)
 write.csv(runtime_summary, "runtime_DarmanisBrain.csv", row.names = FALSE)
-
-# NOTE: cross-method statistical significance (Friedman + post-hoc) is computed
-#       ACROSS all benchmarked datasets, using one (method, dataset) score each --
-#       not on k-means seeds within a single dataset (that would be pseudoreplication).
 
 # -----------------------------------------------------------------------------
 # 9.  Figures
