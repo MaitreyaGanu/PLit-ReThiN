@@ -81,7 +81,7 @@ fit_nb_r <- function(x, mu) {                                 # 1-D ML estimate 
                x = x, mu = mu, maximum = TRUE)$maximum)
 }
 
-score_ReThiN_NB <- function(counts, n_thin = 5L) {             # proposed (= SPARC core: rho_bar), NB null
+score_ReThiN_NB <- function(counts, n_thin = 5L) {             
   m <- nrow(counts); n <- ncol(counts); cv <- as.vector(counts)
   mu    <- rowMeans(counts)
   r_hat <- vapply(seq_len(m), function(j) fit_nb_r(counts[j, ], mu[j]), numeric(1))  # gene-wise NB size r_j
