@@ -14,7 +14,7 @@ Advisor: **Dr. Clint P. George** <br>
 
 ![Language](https://img.shields.io/badge/Language-R-276DC3?style=for-the-badge&logo=r&logoColor=white)
 ![Field](https://img.shields.io/badge/Field-Bioinformatics-00758F?style=for-the-badge)
-![Topic](https://img.shields.io/badge/Topic-Feature%20Selection-orange?style=for-the-badge)
+![Topic](https://img.shields.io/badge/Topic-Unsupervised%20Feature%20Selection-orange?style=for-the-badge)
 ![Models](https://img.shields.io/badge/Models-Poisson%20%7C%20Negative%20Binomial-2E8B57?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Manuscript%20in%20Preparation-yellow?style=for-the-badge)
 
@@ -121,7 +121,7 @@ Both scores reduce to closed-form population quantities. (Renders as math on Git
 
 **PLit** — penalized empirical KL divergence from the fitted null, where $V_j$ = number of distinct observed counts and $d_0$ = number of null parameters:
 
-$$S_j = n\,\widehat{\mathrm{KL}}\!\left(\hat p \;\middle\|\; f(\cdot;\hat\theta_j)\right) - \frac{(V_j-1)-d_0}{2}\ln n$$
+$$S_j = n\,\widehat{\mathrm{KL}}\left(\hat p\middle\| f(\cdot;\hat\theta_j)\right) - \frac{(V_j-1)-d_0}{2} \ln(n)$$
 
 | Instance | Penalty term | Null parameters |
 |---|---|---|
@@ -145,7 +145,7 @@ For each dataset, the table below shows which methods achieve the best **ARI** (
 
 > ⚠️ **Read this as a "best-case per method" view.** Taking each method's best budget flatters *every* method equally (it is applied to baselines too), so it is a fair *relative* comparison but an optimistic *absolute* one. The [Aggregate Ranking](#aggregate-ranking-across-all-7-datasets) below, which averages *across* budgets, is the more conservative summary.
 
-**Legend:** ✅✅✅ = ranked **#1** on ARI or NMI for that dataset · ✅ = ranked in the **top 3** on ARI (or tied for the dataset's best) · — = outside the top 3 on both metrics
+**Legend:** ✅✅✅ = ranked **#1** on ARI or NMI for that dataset | ✅ = ranked in the **top 3** on ARI (or tied for the dataset's best) | — = outside the top 3 on both metrics
 
 | Dataset | 🥇🥈🥉 Top 3 ARI | 🏆 Top NMI | PLit (Poisson) | PLit (NB) | ReThiN (Poisson) | ReThiN (NB) |
 |---|---|---|---|---|---|---|
