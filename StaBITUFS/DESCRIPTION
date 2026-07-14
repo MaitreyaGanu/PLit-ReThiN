@@ -13,4 +13,4 @@ Description: Two unsupervised feature-selection methods for single-cell RNA
     the counts. Both methods support Poisson and Negative Binomial models.
 License: MIT + file LICENSE
 Encoding: UTF-8
-Imports: MASS, stats
+Imports: stats
