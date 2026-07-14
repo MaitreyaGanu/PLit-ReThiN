@@ -13,6 +13,7 @@ Advisor: **Dr. Clint P. George** <br>
 <br>
 
 ![Language](https://img.shields.io/badge/Language-R-276DC3?style=for-the-badge&logo=r&logoColor=white)
+![Package](https://img.shields.io/badge/Package-StaBITUFS-blueviolet?style=for-the-badge&logo=r&logoColor=white)
 ![Field](https://img.shields.io/badge/Field-Bioinformatics-00758F?style=for-the-badge)
 ![Topic](https://img.shields.io/badge/Topic-Unsupervised%20Feature%20Selection-orange?style=for-the-badge)
 ![Models](https://img.shields.io/badge/Models-Poisson%20%7C%20Negative%20Binomial-2E8B57?style=for-the-badge)
@@ -35,6 +36,15 @@ Feature selection is a critical preprocessing step in single-cell RNA sequencing
 Both methods are implemented for the **Poisson** and **Negative Binomial (NB)** count models — PLit extends to any parametric count family, and ReThiN to any convolution-closed count family — and both are deployed inside a single subsampling-based stability wrapper. We benchmark all four instances (PLit-Poisson, PLit-NB, ReThiN-Poisson, ReThiN-NB) against five established feature selectors (scran HVG, Seurat VST, Pearson Residuals, M3Drop, scry Deviance) and a random baseline, across **seven public scRNA-seq datasets** with ground-truth cell labels, scoring downstream *k*-means clustering with Adjusted Rand Index (ARI) and Normalized Mutual Information (NMI) across four feature budgets (K = 100, 200, 500, 1000).
 
 In their **Poisson** instance, both methods are highly competitive with state-of-the-art variance-based approaches: ReThiN attains the **best average rank of all seven methods**, PLit ranks third, and a proposed method lands in the **top three on ARI for every dataset** (best score across budgets). The **Negative Binomial** instance is a clean theoretical extension but an empirically *mixed* one — it helps PLit on some datasets (notably Segerstolpe and Darmanis) yet does not uniformly improve over the Poisson version, and ReThiN-NB in particular underperforms (see [Key Findings](#key-findings-honest-summary)). Both methods use **at most one hyperparameter** (none for PLit, one for ReThiN) — fewer than the trend- and residual-based baselines (scran, Seurat, Pearson) and on par with the parameter-free ones (scry, M3Drop).
+
+## 📦 R Package
+
+The methods proposed in this work are implemented in the **StaBITUFS** R package. 
+
+```r
+# Install from GitHub
+remotes::install_github("MaitreyaGanu/PLit-ReThiN", subdir = "StaBITUFS")
+```
 
 ## Key Findings (Honest Summary)
 
