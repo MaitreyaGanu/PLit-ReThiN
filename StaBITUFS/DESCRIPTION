@@ -1,0 +1,16 @@
+Package: StaBITUFS
+Type: Package
+Title: Stability-Based Information-Theoretic Unsupervised Feature Selection for scRNA-seq
+Version: 0.1.0
+Authors@R: person(given = "Maitreya Sameer", family = "Ganu",
+    email = "maitreyaganu@gmail.com", role = c("aut", "cre"))
+Description: Two unsupervised feature-selection methods for single-cell RNA
+    sequencing count data. PLit (Parametric Length Information Test) ranks genes
+    by a two-part minimum-description-length code-length gap against a fitted
+    parametric null; the unpenalised score equals n times an empirical
+    Kullback-Leibler divergence. ReThiN (Reproducibility via Thinning) ranks
+    genes by the split-half correlation of two independently thinned halves of
+    the counts. Both methods support Poisson and Negative Binomial models.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Imports: MASS, stats
