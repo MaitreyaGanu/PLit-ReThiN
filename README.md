@@ -145,18 +145,18 @@ For each dataset, the table below shows which methods achieve the best **ARI** (
 
 > ⚠️ **Read this as a "best-case per method" view.** Taking each method's best budget flatters *every* method equally (it is applied to baselines too), so it is a fair *relative* comparison but an optimistic *absolute* one. The [Aggregate Ranking](#aggregate-ranking-across-all-7-datasets) below, which averages *across* budgets, is the more conservative summary.
 
-**Legend:** ✅✅✅ = ranked **#1** on ARI or NMI for that dataset | ✅ = ranked in the **top 3** on ARI (or tied for the dataset's best) | — = outside the top 3 on both metrics
-
-| Dataset | 🥇🥈🥉 Top 3 ARI | 🏆 Top NMI | PLit (Poisson) | PLit (NB) | ReThiN (Poisson) | ReThiN (NB) |
+**Legend:** 💯 = ranked **#1** on ARI or NMI for that dataset · ✅ = ranked in the **top 3** on ARI or NMI (or tied for the dataset's best) · — = outside the top 3 on both metrics
+ 
+| Dataset | 🥇🥈🥉 Top 3 ARI | 🥇🥈🥉 Top 3 NMI | PLit (Poisson) | PLit (NB) | ReThiN (Poisson) | ReThiN (NB) |
 |---|---|---|---|---|---|---|
-| **Segerstolpe**<br>(Human Pancreas) | 1. PLit (NB) — 0.625<br>2. ReThiN (Poisson) — 0.564<br>3. Seurat VST — 0.534 | ReThiN (Poisson) — 0.707 | — | ✅✅✅<br>0.625 ARI (K=1000) | ✅✅✅<br>0.707 NMI (K=1000) | — |
-| **Darmanis**<br>(Human Brain) | 1. ReThiN (Poisson) — 0.921<br>2. PLit (NB) — 0.902<br>3. M3Drop — 0.881 | ReThiN (Poisson) — 0.882 | — | ✅<br>0.902 ARI (K=1000) | ✅✅✅<br>0.921 ARI / 0.882 NMI (K=1000) | — |
-| **Tian CellBench**† | 8-way tie at 0.997 ARI (near-saturated dataset) | 8-way tie at 0.993 NMI | ✅<br>0.997 ARI, tied (K=500) | — | ✅<br>0.997 ARI, tied (K=500) | ✅<br>0.997 ARI, tied (K=500) |
-| **Zhengmix4eq** | 1. scry Deviance — 0.930<br>2. PLit (Poisson) — 0.926<br>3. ReThiN (Poisson) — 0.907 | scry Deviance — 0.921 | ✅<br>0.926 ARI (K=500/1000) | — | ✅<br>0.907 ARI (K=1000) | — |
-| **Zhengmix8eq** | 1. scry Deviance — 0.666<br>2. PLit (Poisson) — 0.664<br>3. ReThiN (Poisson) — 0.651 | scry Deviance — 0.752 | ✅<br>0.664 ARI (K=500/1000) | — | ✅<br>0.651 ARI (K=1000) | — |
-| **Baron**<br>(Human Pancreas) | 1. Seurat VST — 0.619<br>2. ReThiN (Poisson) — 0.583<br>3. PLit (Poisson) — 0.579 | Seurat VST — 0.703 | ✅<br>0.579 ARI (K=500) | — | ✅<br>0.583 ARI (K=500) | — |
-| **Zeisel**<br>(Mouse Brain) | 1. Pearson Residuals — 0.885<br>2. ReThiN (Poisson) — 0.882<br>3. M3Drop — 0.871 | ReThiN (Poisson) — 0.839 | — | — | ✅✅✅<br>0.839 NMI (K=1000) | — |
-
+| **Segerstolpe**<br>(Human Pancreas) | 🥇 PLit (NB) — 0.625 <hr> 🥈 ReThiN (Poisson) — 0.564 <hr> 🥉 Seurat VST — 0.534 | 🥇 ReThiN (Poisson) — 0.707 <hr> 🥈 PLit (NB) — 0.696 <hr> 🥉 Seurat VST — 0.689 | — | 💯<br>0.625 ARI (K=1000) | 💯<br>0.707 NMI (K=1000) | — |
+| **Darmanis**<br>(Human Brain) | 🥇 ReThiN (Poisson) — 0.921 <hr> 🥈 PLit (NB) — 0.902 <hr> 🥉 M3Drop — 0.881 | 🥇 ReThiN (Poisson) — 0.882 <hr> 🥈 PLit (NB) — 0.847 <hr> 🥉 M3Drop — 0.832 | — | ✅<br>0.902 ARI · 0.847 NMI (K=1000) | 💯<br>0.921 ARI · 0.882 NMI (K=1000) | — |
+| **Tian CellBench**† | 8-way tie at 0.997 (near-saturated) | 8-way tie at 0.993 (near-saturated) | ✅<br>0.997, tied (K=500) | — | ✅<br>0.997, tied (K=500) | ✅<br>0.997, tied (K=500) |
+| **Zhengmix4eq** | 🥇 scry Deviance — 0.930 <hr> 🥈 PLit (Poisson) — 0.926 <hr> 🥉 ReThiN (Poisson) — 0.907 | 🥇 scry Deviance — 0.921 <hr> 🥈 PLit (Poisson) — 0.918 <hr> 🥉 ReThiN (Poisson) — 0.904 | ✅<br>0.926 ARI · 0.918 NMI (K=500/1000) | — | ✅<br>0.907 ARI · 0.904 NMI (K=1000) | — |
+| **Zhengmix8eq** | 🥇 scry Deviance — 0.666 <hr> 🥈 PLit (Poisson) — 0.664 <hr> 🥉 ReThiN (Poisson) — 0.651 | 🥇 scry Deviance — 0.752 <hr> 🥈 PLit (Poisson) — 0.746 <hr> 🥉 ReThiN (Poisson) — 0.737 | ✅<br>0.664 ARI · 0.746 NMI (K=500/1000) | — | ✅<br>0.651 ARI · 0.737 NMI (K=1000) | — |
+| **Baron**<br>(Human Pancreas) | 🥇 Seurat VST — 0.619 <hr> 🥈 ReThiN (Poisson) — 0.583 <hr> 🥉 PLit (Poisson) — 0.579 | 🥇 Seurat VST — 0.703 <hr> 🥈 Pearson Residuals — 0.690 <hr> 🥉 ReThiN (Poisson) — 0.686 | ✅<br>0.579 ARI (K=500) | — | ✅<br>0.583 ARI · 0.686 NMI (K=500/1000) | — |
+| **Zeisel**<br>(Mouse Brain) | 🥇 Pearson Residuals — 0.885 <hr> 🥈 ReThiN (Poisson) — 0.882 <hr> 🥉 M3Drop — 0.871 | 🥇 ReThiN (Poisson) — 0.839 <hr> 🥈 Pearson Residuals — 0.838 <hr> 🥉 M3Drop — 0.820 | — | — | 💯<br>0.882 ARI · 0.839 NMI (K=1000) | — |
+ 
 † *Tian CellBench saturates quickly: by K ≥ 200, nearly every method (proposed and baseline) reaches ARI ≈ 0.997 / NMI ≈ 0.993, so this dataset does not meaningfully discriminate between feature selectors. PLit-NB plateaus at 0.990 and is the one method outside the 8-way tie.*
 
 ### Aggregate Ranking Across All 7 Datasets
