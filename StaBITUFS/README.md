@@ -43,12 +43,8 @@ Each function returns a `data.frame` ordered best-first with columns `feature`, 
 - Input should be **raw integer counts**, not log-normalised values; non-integers are rounded with a warning.
 - Filter very low-expression genes first (e.g. expressed in fewer than 10 cells), as in the paper.
 - `ReThiN()` thins at random, so set a seed (`set.seed(...)`) for reproducible rankings.
-- Both are `O(mn)` per pass; `ReThiN()` additionally scales with `n_thin`.
-
-## Method & paper
-
-These methods are introduced in *"Stability-Based and Information-Theoretic Unsupervised Feature Selection Methods for Single-Cell RNA Sequencing"* (Ganu & George). Full derivations and benchmarks: https://github.com/MaitreyaGanu/PLit-ReThiN
-
+- Both are `O(m*n)` per pass; `ReThiN()` additionally scales with `n_thin` as `O(m*n*n_thin)`.
+- 
 ## License
 
 MIT © 2026 Maitreya Sameer Ganu
