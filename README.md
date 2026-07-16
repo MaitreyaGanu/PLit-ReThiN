@@ -11,7 +11,7 @@ Advisor: **Dr. Clint P. George** <br>
 *Indian Institute of Technology (IIT) Goa*
 
 <br>
-
+![GitHub Repo stars](https://img.shields.io/github/stars/MaitreyaGanu/PLit-ReThiN?style=for-the-badge&logo=github&color=gold)
 ![Language](https://img.shields.io/badge/Language-R-276DC3?style=for-the-badge&logo=r&logoColor=white)
 ![Package](https://img.shields.io/badge/Package-StaBITUFS-blueviolet?style=for-the-badge&logo=r&logoColor=white)
 ![Field](https://img.shields.io/badge/Field-Bioinformatics-00758F?style=for-the-badge)
