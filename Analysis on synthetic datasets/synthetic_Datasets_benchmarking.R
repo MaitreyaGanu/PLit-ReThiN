@@ -1,21 +1,3 @@
-###############################################################################
-##  synthetic_benchmark.R
-##  Synthetic benchmark mirroring the REAL-data protocol, to show when each
-##  method/instance is useful.  8 datasets on a noise x signal grid:
-##      noise  in {poisson, nb-overdispersed}       -> Poisson vs NB instance
-##      signal in {marker, subtle, multi, dropout}  -> PLit vs ReThiN
-##  Each: 20 cell types, 10,000 genes, 1,000 important genes.
-##
-##  Pipeline per method (same as the paper): filter genes -> select top-K ->
-##  library-size normalise -> PCA(15) -> k-means(20) -> ARI / NMI, for
-##  K in {100,200,500,1000}.  Also reports % of important genes recovered.
-##  ARI/NMI use the aricode package.  No tSNE.
-##
-##  RUN WITH:  source("synthetic_benchmark.R")   (do not paste line by line)
-##  Packages:  StaBITUFS, aricode, pheatmap.
-##  Outputs -> ~/Desktop/synthetic_benchmark/ .  Scored once by default; the
-##  full 5x20 subsampling wrapper is behind USE_WRAPPER (much slower).
-###############################################################################
 suppressPackageStartupMessages({ library(StaBITUFS); library(aricode); library(pheatmap) })
 
 OUT <- path.expand("~/Desktop/synthetic_benchmark")
@@ -27,7 +9,7 @@ PER_TYPE   <- 60           # cells per type  -> n = 1200 cells
 N_IMP      <- 1000         # important genes per dataset (fixed for fair comparison)
 KS         <- c(100, 200, 500, 1000)   # feature budgets (as in the real study)
 N_THIN     <- 5            # ReThiN thinning repetitions
-N_KM_SEEDS <- 30           # k-means evaluation seeds to AVERAGE over (real study used 30; raise for exactness, lower for speed)
+N_KM_SEEDS <- 30          
 R_OVER     <- 1.5          # NB dispersion for the "nb" noise datasets (smaller = more overdispersed)
 INSTANCES  <- c("PLit_Pois", "PLit_NB", "ReThiN_Pois", "ReThiN_NB")
 
@@ -156,7 +138,3 @@ pheatmap(wide, cluster_rows = FALSE, cluster_cols = FALSE, display_numbers = TRU
 cat("\n=== WINNER PER DATASET (by mean ARI over K) ===\n"); print(winner, row.names = FALSE)
 cat("\n=== RECOVERY (% of important genes) ===\n"); print(recov_df, row.names = FALSE)
 cat("\nAll outputs saved to:", OUT, "\n")
-###############################################################################
-##  Files produced:  clustering_metrics.csv, mean_metrics.csv, recovery.csv,
-##  winner_per_dataset.csv, scoreboard_ARI.pdf .
-###############################################################################
