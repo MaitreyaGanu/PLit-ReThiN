@@ -11,19 +11,20 @@ Advisor: **Dr. Clint P. George** <br>
 *Indian Institute of Technology (IIT) Goa*
 
 <br>
-![GitHub Repo stars](https://img.shields.io/github/stars/MaitreyaGanu/PLit-ReThiN?style=for-the-badge&logo=github&color=gold)
-![Language](https://img.shields.io/badge/Language-R-276DC3?style=for-the-badge&logo=r&logoColor=white)
-![Package](https://img.shields.io/badge/Package-StaBITUFS-blueviolet?style=for-the-badge&logo=r&logoColor=white)
-![Field](https://img.shields.io/badge/Field-Bioinformatics-00758F?style=for-the-badge)
-![Topic](https://img.shields.io/badge/Topic-Unsupervised%20Feature%20Selection-orange?style=for-the-badge)
-![Models](https://img.shields.io/badge/Models-Poisson%20%7C%20Negative%20Binomial-2E8B57?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Manuscript%20in%20Preparation-yellow?style=for-the-badge)
 
-<br>
+<img src="https://img.shields.io/github/stars/MaitreyaGanu/PLit-ReThiN?style=for-the-badge&logo=github&color=gold" />
+<img src="https://img.shields.io/badge/Language-R-276DC3?style=for-the-badge&logo=r&logoColor=white" />
+<img src="https://img.shields.io/badge/Package-StaBITUFS-blueviolet?style=for-the-badge&logo=r&logoColor=white" />
+<img src="https://img.shields.io/badge/Field-Bioinformatics-00758F?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Topic-Unsupervised%20Feature%20Selection-orange?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Models-Poisson%20%7C%20Negative%20Binomial-2E8B57?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Status-Manuscript%20in%20Preparation-yellow?style=for-the-badge" />
 
-[Abstract](#project-abstract) • [Key Findings](#key-findings-honest-summary) • [Core Hypothesis](#core-hypothesis) • [Methodology](#methodology) • [Theory](#theoretical-results) • [Results](#results) • [Limitations](#limitations) • [Usage](#usage) 
+<br><br>
+
+[Abstract](#project-abstract) • [Key Findings](#key-findings-honest-summary) • [Core Hypothesis](#core-hypothesis) • [Methodology](#methodology) • [Theory](#theoretical-results) • [Results](#results) • [Limitations](#limitations) • [Usage](#usage)
+
 </div>
-
 ---
 
 ## Project Abstract
