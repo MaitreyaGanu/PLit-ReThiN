@@ -1,0 +1,9 @@
+"dataset","best_instance","best_ARI"
+"dropout_nb","ReThiN_Pois",0.793
+"dropout_poisson","PLit_NB",0.814
+"marker_nb","ReThiN_NB",0.787
+"marker_poisson","ReThiN_NB",0.765
+"multi_nb","ReThiN_NB",0.917
+"multi_poisson","ReThiN_NB",0.889
+"subtle_nb","PLit_Pois",0.003
+"subtle_poisson","ReThiN_Pois",0.004
