@@ -25,7 +25,7 @@ Advisor: **Dr. Clint P. George** <br>
 [Abstract](#project-abstract) • [Key Findings](#key-findings-honest-summary) • [Core Hypothesis](#core-hypothesis) • [Methodology](#methodology) • [Theory](#theoretical-results) • [Results](#results) • [Limitations](#limitations) • [Usage](#usage)
 
 </div>
----
+
 
 ## Project Abstract
 
