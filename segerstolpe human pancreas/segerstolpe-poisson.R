@@ -1,13 +1,3 @@
-# =============================================================================
-# Feature-selection benchmark  --  Segerstolpe 2016 Human Pancreas  (Poisson instances)
-# Metrics : ARI, NMI   (PCA -> k-means at true number of cell types; mean over k-means seeds)
-# FAIRNESS: EVERY method is run inside the SAME subsampling wrapper (B rounds of
-#           80% cell subsamples, identical subsamples for all methods, average-rank
-#           aggregation). Cross-dataset comparisons (mean ranks, bootstrap intervals)
-#           are computed afterwards from the per-dataset summaries.
-# Proposed methods: ReThiN (Poisson thinning), PLit (Poisson null).
-# NOTE: Segerstolpe contains read counts (Smart-seq2), not UMIs.
-# =============================================================================
 
 # -----------------------------------------------------------------------------
 # 1.  Packages
