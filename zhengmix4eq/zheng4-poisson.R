@@ -1,0 +1,293 @@
+# =============================================================================
+# Feature-selection benchmark  --  Zhengmix4eq PBMC  (Poisson instances)
+# Metrics : ARI, NMI   (PCA -> k-means at true number of cell types; mean over k-means seeds)
+# FAIRNESS: EVERY method is run inside the SAME subsampling wrapper (B rounds of
+#           80% cell subsamples, identical subsamples for all methods, average-rank
+#           aggregation). Cross-dataset comparisons (mean ranks, bootstrap intervals)
+#           are computed afterwards from the per-dataset summaries.
+# Proposed methods: ReThiN (Poisson thinning), PLit (Poisson null).
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1.  Packages
+# -----------------------------------------------------------------------------
+cat("Loading packages...\n")
+suppressPackageStartupMessages({
+  library(DuoClustering2018)            # Zhengmix datasets
+  library(SingleCellExperiment)
+  library(scran); library(scater); library(scry)
+  library(Seurat); library(M3Drop)
+  library(mclust); library(aricode)
+  library(pbapply); library(progress)
+  library(ggplot2); library(dplyr); library(tidyr)
+})
+pboptions(type = "timer")
+options(ExperimentHub.ask = FALSE)
+
+# -----------------------------------------------------------------------------
+# 2.  Data
+# -----------------------------------------------------------------------------
+cat("Loading Zhengmix4eq (Zheng 2017 purified PBMC, 4 populations mixed in equal proportions)...\n")
+sce         <- suppressMessages(sce_full_Zhengmix4eq())
+counts_mat  <- as.matrix(counts(sce))                         # dense (all downstream ops densify anyway)
+counts_mat  <- counts_mat[rowSums(counts_mat > 0) >= 10, ]    # genes expressed in >= 10 cells
+true_labels <- factor(colData(sce)$phenoid)                   # purified-population labels
+n_true_k    <- nlevels(true_labels)
+print(table(true_labels))
+cat(sprintf("Dataset: %d genes x %d cells, %d cell types\n\n",
+            nrow(counts_mat), ncol(counts_mat), n_true_k))
+
+# Library-size factors computed ONCE on the full filtered matrix and reused for every
+# K-subset, so normalisation never depends on which genes a method selected.
+sce_full <- logNormCounts(SingleCellExperiment(assays = list(counts = counts_mat)))
+full_sf  <- sizeFactors(sce_full)
+
+# -----------------------------------------------------------------------------
+# 3.  Experimental constants
+# -----------------------------------------------------------------------------
+TOP_K         <- c(100L, 200L, 500L, 1000L)
+SUB_SEEDS     <- 1:5        # subsampling seeds -> mean +/- SD (applied to EVERY method)
+B_ROUNDS      <- 20L        # subsampling rounds per seed
+SUB_FRAC      <- 0.8        # fraction of cells per subsample (without replacement)
+KMEANS_SEEDS  <- 1:30       # k-means repetitions to average out clustering noise
+KMEANS_NSTART <- 25L
+
+# -----------------------------------------------------------------------------
+# 4.  Core scorers   (counts -> named per-gene score; higher = more informative)
+#     None of them sees the labels. No resampling inside -- the wrapper adds it.
+# -----------------------------------------------------------------------------
+row_cor <- function(A, B) {                                   # vectorised row-wise Pearson; 0 if a half is constant
+  Ac <- A - rowMeans(A); Bc <- B - rowMeans(B)
+  num <- rowSums(Ac * Bc); den <- sqrt(rowSums(Ac^2) * rowSums(Bc^2))
+  ifelse(den == 0, 0, num / den)
+}
+
+# ReThiN (Algorithm 3): Binomial(x, 1/2) thinning, within-cell normalisation
+# by max(cell total, 1), Pearson correlation across cells, averaged over n_thin splits.
+score_ReThiN <- function(counts, n_thin = 5L) {
+  m <- nrow(counts); n <- ncol(counts); cv <- as.vector(counts)
+  nz <- which(cv > 0); xnz <- cv[nz]                          # thin only nonzeros (Binomial(0, .) = 0)
+  rt <- matrix(0, m, n_thin)
+  for (t in seq_len(n_thin)) {
+    Av <- cv; Av[nz] <- rbinom(length(xnz), xnz, 0.5); Bv <- cv - Av
+    Am <- matrix(Av, m); Bm <- matrix(Bv, m)
+    sA <- colSums(Am); sA[sA == 0] <- 1; sB <- colSums(Bm); sB[sB == 0] <- 1
+    rt[, t] <- row_cor(sweep(Am, 2, sA, "/"), sweep(Bm, 2, sB, "/"))
+  }
+  setNames(rowMeans(rt), rownames(counts))
+}
+
+# PLit, Poisson null (Algorithm 2 with d0 = 1):
+# S_j = L1_j - L0_j - ((V_j - 1) - 1)/2 * log(n);  S_j = -Inf if V_j < d0 + 1 = 2.
+score_PLit <- function(counts) {
+  n <- ncol(counts); lam <- rowMeans(counts)
+  log_lam <- ifelse(lam > 0, log(lam), 0)
+  L0 <- n * lam * log_lam - n * lam - rowSums(lgamma(counts + 1L))   # Poisson log-likelihood at lambda_hat = mean
+  tab <- apply(counts, 1L, function(x) {                              # empirical log-lik L1_j and V_j
+    ct <- tabulate(x + 1L); ct <- ct[ct > 0L]; c(sum(ct * log(ct / n)), length(ct))
+  })
+  Sj <- tab[1L, ] - L0 - ((tab[2L, ] - 2L) / 2) * log(n)
+  Sj[lam == 0 | tab[2L, ] < 2] <- -Inf
+  setNames(Sj, rownames(counts))
+}
+
+score_pearson <- function(counts) {                           # Lause analytic Pearson residuals, theta = 100
+  n <- ncol(counts)
+  mu <- outer(rowSums(counts), colSums(counts)) / sum(counts)
+  z  <- (counts - mu) / sqrt(mu + mu^2 / 100)
+  cl <- sqrt(n); z[z > cl] <- cl; z[z < -cl] <- -cl
+  setNames(apply(z, 1, var), rownames(counts))
+}
+
+score_scran <- function(counts, sf = NULL) {                  # uses the injected (full-data) size factors
+  s <- SingleCellExperiment(assays = list(counts = counts))
+  if (!is.null(sf)) sizeFactors(s) <- sf
+  s <- logNormCounts(s); d <- modelGeneVar(s)
+  setNames(d$bio, rownames(d))[rownames(counts)]
+}
+
+score_deviance <- function(counts)                            # scry binomial deviance
+  setNames(as.numeric(devianceFeatureSelection(counts)), rownames(counts))
+
+score_seurat <- function(counts) {                            # Seurat VST (standardized variance)
+  options(Seurat.object.assay.version = "v3")
+  so <- suppressWarnings(suppressMessages(CreateSeuratObject(counts = counts)))
+  so <- suppressMessages(FindVariableFeatures(so, selection.method = "vst",
+                                              nfeatures = nrow(counts), verbose = FALSE))
+  hv <- HVFInfo(so)
+  setNames(hv$variance.standardized[match(gsub("_", "-", rownames(counts)), rownames(hv))],
+           rownames(counts))
+}
+
+score_m3drop <- function(counts) {                            # M3Drop dropout-based, score = -log10(p)
+  m3n <- suppressMessages(M3DropConvertData(counts, is.counts = TRUE))
+  m3f <- suppressMessages(M3DropFeatureSelection(m3n, mt_method = "fdr",
+                                                 mt_threshold = 1, suppress.plot = TRUE))
+  sc <- setNames(numeric(nrow(counts)), rownames(counts))
+  hit <- intersect(m3f$Gene, names(sc))
+  sc[hit] <- -log10(pmax(m3f$p.value[match(hit, m3f$Gene)], 1e-300)); sc
+}
+
+score_random <- function(counts) setNames(runif(nrow(counts)), rownames(counts))
+
+SCORERS <- list(
+  ReThiN            = score_ReThiN,
+  PLit              = score_PLit,
+  scran_HVG         = score_scran,
+  scry_Deviance     = score_deviance,
+  Seurat_VST        = score_seurat,
+  Pearson_Residuals = score_pearson,
+  M3Drop            = score_m3drop,
+  Random_Baseline   = score_random
+)
+
+# Subsampled rank aggregation (Algorithm 1). All B subsamples are drawn right after
+# set.seed(), before any scoring, so every method gets the same subsamples per seed.
+# A gene with an NA score is ranked last in that round (ties averaged); a round in
+# which the scorer failed entirely (all NA) is skipped.
+subsample_rank <- function(score_fn, counts, B, seed, sf, needs_sf = FALSE, label = "") {
+  set.seed(seed); m <- nrow(counts); n <- ncol(counts)
+  acc <- numeric(m); n_ok <- 0L
+  sub_idx <- lapply(seq_len(B), function(b) sample(n, round(SUB_FRAC * n)))
+  pb <- progress_bar$new(
+    format = paste0("    ", label, " [:bar] :current/:total | :percent | ETA: :eta"),
+    total = B, clear = FALSE, width = 80, force = TRUE)
+  for (b in seq_len(B)) {
+    idx <- sub_idx[[b]]; bc <- counts[, idx, drop = FALSE]; colnames(bc) <- paste0("cell", seq_len(ncol(bc)))
+    sc <- tryCatch(
+      if (needs_sf) score_fn(bc, sf[idx]) else score_fn(bc),
+      error = function(e) setNames(rep(NA_real_, m), rownames(counts)))
+    sc <- sc[rownames(counts)]
+    if (all(is.na(sc))) { warning(sprintf("%s: round %d failed, skipped", label, b)); pb$tick(); next }
+    sc[is.na(sc)] <- -Inf
+    acc <- acc + rank(-sc, ties.method = "average")
+    n_ok <- n_ok + 1L
+    pb$tick()
+  }
+  if (n_ok == 0L) stop(sprintf("%s: all %d rounds failed", label, B))
+  rownames(counts)[order(acc / n_ok)]
+}
+
+# -----------------------------------------------------------------------------
+# 5.  Run every selector through the SAME subsampling wrapper (runtime logged)
+# -----------------------------------------------------------------------------
+methods_ranked <- list(); runtime_log <- list()
+for (mname in names(SCORERS)) {
+  cat(sprintf("-- %s  (%d seeds x B=%d) --\n", mname, length(SUB_SEEDS), B_ROUNDS))
+  for (s in SUB_SEEDS) {
+    cat(sprintf("  Seed %d/%d:\n", s, max(SUB_SEEDS)))
+    t0 <- proc.time()[["elapsed"]]
+    methods_ranked[[sprintf("%s_s%d", mname, s)]] <-
+      subsample_rank(SCORERS[[mname]], counts_mat, B_ROUNDS, s,
+                     sf = full_sf, needs_sf = (mname == "scran_HVG"), label = mname)
+    runtime_log[[length(runtime_log) + 1L]] <- data.frame(
+      Method = mname, Seed = s, Runtime_s = proc.time()[["elapsed"]] - t0,
+      stringsAsFactors = FALSE)
+  }
+}
+runtime_df <- do.call(rbind, runtime_log)
+cat(sprintf("\nAll selectors done. %d (method x seed) rankings.\n\n", length(methods_ranked)))
+
+# -----------------------------------------------------------------------------
+# 6.  Evaluation  --  PCA (15 PCs) -> k-means (true number of cell types) -> ARI + NMI
+#     ntop = length(top_genes) so runPCA uses exactly the selected genes.
+# -----------------------------------------------------------------------------
+cat("-- Evaluation: PCA -> k-means --\n")
+grid <- expand.grid(Method_key = names(methods_ranked), K = TOP_K, stringsAsFactors = FALSE)
+cat(sprintf("  %d evaluation jobs x %d k-means seeds\n", nrow(grid), length(KMEANS_SEEDS)))
+
+raw_results <- pblapply(seq_len(nrow(grid)), function(i) {
+  mkey <- grid$Method_key[i]; k <- grid$K[i]
+  method   <- sub("_s[0-9]+$", "", mkey)
+  sub_seed <- as.integer(sub(".*_s", "", mkey))
+  top_genes <- head(methods_ranked[[mkey]], k)
+  if (length(top_genes) < 5L) return(NULL)
+  
+  sub <- SingleCellExperiment(assays = list(counts = counts_mat[top_genes, ]))
+  sizeFactors(sub) <- full_sf                                  # precomputed factors (not re-estimated)
+  sub <- logNormCounts(sub)
+  sub <- suppressWarnings(runPCA(sub, ncomponents = min(15L, length(top_genes) - 1L),
+                                 ntop = length(top_genes)))
+  pc <- reducedDim(sub, "PCA")
+  
+  do.call(rbind, lapply(KMEANS_SEEDS, function(ks) {
+    set.seed(ks)
+    km <- kmeans(pc, centers = n_true_k, nstart = KMEANS_NSTART)
+    cl <- factor(km$cluster)
+    data.frame(Method = method, Sub_seed = sub_seed, K = k, KM_seed = ks,
+               ARI = mclust::adjustedRandIndex(true_labels, cl),
+               NMI = aricode::NMI(true_labels, cl), stringsAsFactors = FALSE)
+  }))
+})
+raw_df <- do.call(rbind, Filter(Negate(is.null), raw_results))
+write.csv(raw_df, "raw_results_ZhengMix4eq.csv", row.names = FALSE)
+
+# -----------------------------------------------------------------------------
+# 7.  Aggregation  (Step 1: average over k-means seeds; Step 2: mean +/- SD over
+#     the 5 subsampling seeds)
+# -----------------------------------------------------------------------------
+per_seed <- raw_df |>
+  dplyr::group_by(Method, Sub_seed, K) |>
+  dplyr::summarise(ARI_s = mean(ARI), NMI_s = mean(NMI), .groups = "drop")
+
+summary_df <- per_seed |>
+  dplyr::group_by(Method, K) |>
+  dplyr::summarise(ARI = round(mean(ARI_s), 4), ARI_sd = round(sd(ARI_s), 4),
+                   NMI = round(mean(NMI_s), 4), NMI_sd = round(sd(NMI_s), 4),
+                   .groups = "drop") |>
+  dplyr::arrange(K, dplyr::desc(ARI))
+
+cat("\n================== BENCHMARK SUMMARY ==================\n")
+print(as.data.frame(summary_df), row.names = FALSE)
+write.csv(summary_df, "benchmark_summary_ZhengMix4eq.csv", row.names = FALSE)
+
+# -----------------------------------------------------------------------------
+# 8.  Runtime summary  (mean +/- SD over subsampling seeds, for every method)
+# -----------------------------------------------------------------------------
+runtime_summary <- runtime_df |>
+  dplyr::group_by(Method) |>
+  dplyr::summarise(Runtime_mean_s = round(mean(Runtime_s), 2),
+                   Runtime_sd_s   = round(sd(Runtime_s), 2), .groups = "drop") |>
+  dplyr::arrange(dplyr::desc(Runtime_mean_s))
+cat("\n================== RUNTIME (seconds) ==================\n")
+print(as.data.frame(runtime_summary), row.names = FALSE)
+write.csv(runtime_summary, "runtime_ZhengMix4eq.csv", row.names = FALSE)
+
+# -----------------------------------------------------------------------------
+# 9.  Figures
+# -----------------------------------------------------------------------------
+p_ari <- ggplot(summary_df, aes(K, ARI, colour = Method, group = Method)) +
+  geom_line(linewidth = 0.9) + geom_point(size = 2.5) +
+  geom_errorbar(aes(ymin = ARI - ARI_sd, ymax = ARI + ARI_sd), width = 25, alpha = 0.5) +
+  scale_x_continuous(breaks = TOP_K) + theme_bw(base_size = 13) +
+  labs(title = "Feature selection - ARI (Zhengmix4eq PBMC)",
+       subtitle = "Error bars: SD over 5 subsampling seeds (same subsamples for all methods)",
+       x = "Features selected (K)", y = "ARI (mean +/- SD)", colour = NULL)
+
+p_nmi <- ggplot(summary_df, aes(K, NMI, colour = Method, group = Method)) +
+  geom_line(linewidth = 0.9) + geom_point(size = 2.5) +
+  geom_errorbar(aes(ymin = NMI - NMI_sd, ymax = NMI + NMI_sd), width = 25, alpha = 0.5) +
+  scale_x_continuous(breaks = TOP_K) + theme_bw(base_size = 13) +
+  labs(title = "Feature selection - NMI (Zhengmix4eq PBMC)",
+       subtitle = "Error bars: SD over 5 subsampling seeds (same subsamples for all methods)",
+       x = "Features selected (K)", y = "NMI (mean +/- SD)", colour = NULL)
+
+p_rt <- runtime_summary |>
+  dplyr::mutate(Method = reorder(Method, Runtime_mean_s)) |>
+  ggplot(aes(Method, Runtime_mean_s)) +
+  geom_col(fill = "steelblue", width = 0.6) +
+  geom_errorbar(aes(ymin = pmax(Runtime_mean_s - Runtime_sd_s, 0),
+                    ymax = Runtime_mean_s + Runtime_sd_s), width = 0.3) +
+  coord_flip() + theme_bw(base_size = 13) +
+  labs(title = "Wall-clock runtime - Zhengmix4eq PBMC", x = NULL, y = "Time (seconds)")
+
+ggsave("fig_ARI_ZhengMix4eq.pdf",     p_ari, width = 8, height = 5)
+ggsave("fig_NMI_ZhengMix4eq.pdf",     p_nmi, width = 8, height = 5)
+ggsave("fig_Runtime_ZhengMix4eq.pdf", p_rt,  width = 6, height = 5)
+
+# -----------------------------------------------------------------------------
+# 10.  Session info  (reproducibility)
+# -----------------------------------------------------------------------------
+cat("\n================== SESSION INFO ==================\n")
+si <- sessionInfo(); print(si)
+sink("session_info_ZhengMix4eq.txt"); print(si); sink()
