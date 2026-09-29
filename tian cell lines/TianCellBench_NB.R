@@ -1,14 +1,3 @@
-# =============================================================================
-# Feature-selection benchmark  --  Tian CellBench 10x  (negative-binomial instance of PLit)
-# Metrics : ARI, NMI   (PCA -> k-means at true number of cell types; mean over k-means seeds)
-# FAIRNESS: EVERY method is run inside the SAME subsampling wrapper (B rounds of
-#           80% cell subsamples, identical subsamples for all methods, average-rank
-#           aggregation). Cross-dataset comparisons (mean ranks, bootstrap intervals)
-#           are computed afterwards from the per-dataset summaries.
-# Proposed method: PLit with a negative-binomial null. (ReThiN has no NB instance.)
-# Baselines, subsampling wrapper, evaluation and aggregation are identical to the
-# Poisson script, so the baseline results reproduce those of the Poisson run.
-# =============================================================================
 
 # -----------------------------------------------------------------------------
 # 1.  Packages
