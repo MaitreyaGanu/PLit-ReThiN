@@ -2,356 +2,201 @@
 
 # 🧬 PLit & ReThiN 🔬
 
-### Stability-Based and Information-Theoretic Unsupervised Feature Selection Methods for Single-Cell RNA Sequencing
+### Unsupervised Feature Selection for scRNA-seq Count Data via Description Length and Data Thinning
 
 **<u>Maitreya Sameer Ganu</u>**<br>
-*Indian Institute of Science Education and Research (IISER), Thiruvananthapuram*<br>
+*Indian Institute of Science Education and Research (IISER) Thiruvananthapuram*<br>
 
-Advisor: **Dr. Clint P. George** <br>
+Advisor: **Dr. Clint P. George**<br>
 *Indian Institute of Technology (IIT) Goa*
 
 <br>
 
-<img src="https://img.shields.io/github/stars/MaitreyaGanu/PLit-ReThiN?style=for-the-badge&logo=github&color=gold" />
-<img src="https://img.shields.io/badge/Language-R-276DC3?style=for-the-badge&logo=r&logoColor=white" />
-<img src="https://img.shields.io/badge/Package-StaBITUFS-blueviolet?style=for-the-badge&logo=r&logoColor=white" />
-<img src="https://img.shields.io/badge/Field-Bioinformatics-00758F?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Topic-Unsupervised%20Feature%20Selection-orange?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Models-Poisson%20%7C%20Negative%20Binomial-2E8B57?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Status-Manuscript%20in%20Preparation-yellow?style=for-the-badge" />
+<a href="https://github.com/MaitreyaGanu/PLit-ReThiN/stargazers"><img src="https://img.shields.io/github/stars/MaitreyaGanu/PLit-ReThiN?style=for-the-badge&logo=github&color=gold" alt="GitHub stars"/></a>
+<img src="https://img.shields.io/badge/Language-R-276DC3?style=for-the-badge&logo=r&logoColor=white" alt="R"/>
+<img src="https://img.shields.io/badge/Package-StaBITUFS-blueviolet?style=for-the-badge&logo=r&logoColor=white" alt="StaBITUFS"/>
+<img src="https://img.shields.io/badge/Field-Bioinformatics-00758F?style=for-the-badge" alt="Bioinformatics"/>
+<img src="https://img.shields.io/badge/Topic-Unsupervised%20Feature%20Selection-orange?style=for-the-badge" alt="Unsupervised feature selection"/>
+<img src="https://img.shields.io/badge/Status-Manuscript%20in%20Preparation-yellow?style=for-the-badge" alt="Status"/>
 
 <br><br>
 
-[Abstract](#project-abstract) • [Key Findings](#key-findings-honest-summary) • [Core Hypothesis](#core-hypothesis) • [Methodology](#methodology) • [Theory](#theoretical-results) • [Results](#results) • [Limitations](#limitations) • [Usage](#usage)
+[Overview](#overview) • [Key findings](#key-findings) • [Methods](#methods) • [Theory](#theory) • [Benchmark](#benchmark-setup) • [Results](#results) • [Limitations](#limitations) • [Installation](#installation-and-usage)
 
 </div>
 
+## Overview
 
-## Project Abstract
+Feature selection is a standard step before dimensionality reduction and clustering of single-cell RNA sequencing (scRNA-seq) data. Most unsupervised selectors score a gene against a trend fitted across all genes, or reward any departure from a null model without accounting for the complexity needed to describe it. This project proposes two feature-selection methods for count data, each of which targets an explicitly defined per-gene quantity:
 
-Feature selection is a critical preprocessing step in single-cell RNA sequencing (scRNA-seq), shaping downstream clustering, cell-type annotation, and every analysis built on top of it. This project introduces two unsupervised feature selection methods for count data:
+- **PLit** (*Parametric Length Information Test*) uses the minimum description length (MDL) principle to compare a Poisson or negative-binomial (NB) null with the empirical distribution of a gene's counts. Its score is a complexity-penalized empirical Kullback–Leibler divergence.
+- **ReThiN** (*Reproducibility via Thinning*) splits each count into two independent halves by Poisson data thinning and scores a gene by how well its variation between cells reproduces across the two halves.
 
-- **PLit** (*Parametric Length Information Test*) — ranks genes by comparing the description length of their empirical count distribution against a fitted parametric null, using the Minimum Description Length (MDL) principle.
-- **ReThiN** (*Reproducibility via Thinning*) — ranks genes by how reproducible their expression profile is under data thinning, measured via a split-half correlation.
+We compare three proposed instances, **PLit (Poisson)**, **PLit (NB)** and **ReThiN**, with five established selectors (scran HVG, Seurat VST, scry Deviance, analytic Pearson residuals, M3Drop) and a random baseline. The benchmark covers **seven annotated scRNA-seq datasets** and four feature budgets (K = 100, 200, 500, 1000), and scores *k*-means clustering by ARI and NMI. Every method is run through the same subsampling-and-rank-aggregation wrapper, on the same cell subsamples.
 
-Both methods are implemented for the **Poisson** and **Negative Binomial (NB)** count models — PLit extends to any parametric count family, and ReThiN to any convolution-closed count family — and both are deployed inside a single subsampling-based stability wrapper. We benchmark all four instances (PLit-Poisson, PLit-NB, ReThiN-Poisson, ReThiN-NB) against five established feature selectors (scran HVG, Seurat VST, Pearson Residuals, M3Drop, scry Deviance) and a random baseline, across **seven public scRNA-seq datasets** with ground-truth cell labels, scoring downstream *k*-means clustering with Adjusted Rand Index (ARI) and Normalized Mutual Information (NMI) across four feature budgets (K = 100, 200, 500, 1000).
+## Key findings
 
-In their **Poisson** instance, both methods are highly competitive with state-of-the-art variance-based approaches: ReThiN attains the **best average rank of all seven methods**, PLit ranks third, and a proposed method lands in the **top three on ARI for every dataset** (best score across budgets). The **Negative Binomial** instance is a clean theoretical extension but an empirically *mixed* one — it helps PLit on some datasets (notably Segerstolpe and Darmanis) yet does not uniformly improve over the Poisson version, and ReThiN-NB in particular underperforms (see [Key Findings](#key-findings-honest-summary)). Both methods use **at most one hyperparameter** (none for PLit, one for ReThiN) — fewer than the trend- and residual-based baselines (scran, Seurat, Pearson) and on par with the parameter-free ones (scry, M3Drop).
+> These are stated plainly, including where the proposed methods do **not** win. With seven datasets, all differences are descriptive; no significance test has been applied.
 
-## 📦 R Package
+**ReThiN is consistently near the top.**
+- It has the **best mean rank of all eight methods** in both ARI (3.20) and NMI (3.12), ahead of scry Deviance (3.91 / 3.73).
+- It is in the **top three on all seven datasets** (mean ARI rank over the four budgets), but **first on none**.
+- Across the 28 dataset–budget combinations, it is in the top three in 19 for ARI and never ranks below fifth.
+- Its lead grows with K. Its average ARI gain over random selection is the largest of all methods at K = 500 and K = 1000 (0.219 and 0.188), and within 0.001 of the largest at K = 100 and 200.
 
-The methods proposed in this work are implemented in the **StaBITUFS** R package. 
+**PLit (Poisson) behaves like scry Deviance.**
+- Its ARI is within 0.037 of scry's in 27 of 28 dataset–budget combinations.
+- It is first or second at every budget on Zhengmix4eq, and at K ≥ 200 on Zhengmix8eq.
 
-```r
-# Install from GitHub
-remotes::install_github("MaitreyaGanu/PLit-ReThiN", subdir = "StaBITUFS")
-```
+**PLit's null must match the technical noise.**
+- On the **four informative UMI datasets**, PLit (Poisson) has a mean ARI rank of 3.38. PLit (NB) has 7.56 and falls below random on Zeisel at every budget.
+- On the **two read-count datasets** (Segerstolpe, Darmanis) the order reverses: PLit (NB) ranks **1.25**, the best of all methods, while PLit (Poisson) ranks 5.62.
+- UMI counts are close to Poisson, so a negative binomial with its own dispersion absorbs real variation between cells. Read counts carry extra overdispersion from amplification, so there the negative binomial is the better reference. This rests on only two read-count datasets, which also differ in platform, depth and cell number.
 
-## Key Findings (Honest Summary)
+**Informed selection matters most at small budgets.** The ARI gain over random selection falls from 0.25–0.37 at K = 100 to 0.04–0.19 at K = 1000.
 
-> This section states the results as plainly as possible, including where the methods **do not** win. The benchmark uses only 7 datasets, so most differences are directional, not statistically certified.
+## Methods
 
-**What works (Poisson instances):**
-- **ReThiN (Poisson) has the best mean rank of all 7 methods** on both ARI (2.57) and NMI (2.71), ahead of every established baseline.
-- **PLit (Poisson) ranks 3rd on ARI** (3.57), ahead of four of the five baselines.
-- A proposed method appears in the **top-3 ARI on all 7 datasets**, and ReThiN (Poisson) has the **single best NMI** on 3 of 7 datasets (Segerstolpe, Darmanis, Zeisel).
+**PLit.** For each gene, PLit fits a parametric null by maximum likelihood: Poisson (rate) or negative binomial (mean and size, with the size found numerically on [10⁻³, 10⁶]). It compares the null's log-likelihood with the log-likelihood of the gene's empirical count distribution. Following Rissanen's two-part MDL code, the empirical model is charged (½ ln n) per extra parameter, where it has V − 1 parameters for V distinct count values. Before the penalty, the score is exactly n × KL(empirical ‖ fitted null).
 
-**What is only weakly supported:**
-- With 7 datasets, dataset-level bootstrap CIs exclude zero on **both** metrics for exactly **two** comparisons: **ReThiN > Seurat VST** and **ReThiN > Pearson Residuals**. Every other win (including PLit's) is a directional point estimate, not a certified effect.
-- PLit shows a **small but statistically supported deficit vs. scry Deviance on NMI** — an honest negative for PLit.
+**ReThiN.** Each count is split into two halves with Binomial(x, ½), so that under Poisson noise the halves are independent given the cell's expected expression. Each half is divided by its cell total, and the score is the Pearson correlation of the two halves across cells, averaged over n_thin = 5 thinning repeats. Genes whose variation is only sampling noise score about zero; genes whose expected expression differs between cells score higher.
 
-**What does *not* work (Negative Binomial instances):**
-- The NB extension is theoretically clean but **empirically a net negative**. Under the NB instance, **ReThiN falls to the worst mean rank of the seven methods** (6.57 ARI / 6.57 NMI) and **PLit falls to second-to-last** (4.71 / 4.86); the parameter-free M3Drop becomes the top-ranked method.
-- NB helps only in specific places — chiefly **PLit-NB on Segerstolpe and Darmanis**. It is presented as an initial extension that needs refinement, **not** a replacement for the Poisson formulation.
+> An earlier version also had a negative-binomial instance of ReThiN. It has been removed: when the dispersion is estimated from the same data, it absorbs the biological variation the score is meant to detect.
 
-**Bottom line:** the contribution is the pair of *Poisson* estimators, which are competitive-and-simple; the NB generalization is a correct derivation whose empirical payoff is dataset-dependent and, on average, unfavorable.
+### Methods compared
 
-## Core Hypothesis
-
-Existing scRNA-seq feature selectors typically bury their assumptions inside preprocessing choices — a normalization strategy, a trend-fitting bandwidth, a clipping threshold, a fixed overdispersion constant — so that two "standard" selectors can disagree substantially even on identical data, and it's often unclear *which* assumption is driving *which* selected gene.
-
-The hypothesis behind this project is that a feature selector should instead make exactly **one** explicit, statable, and swappable assumption about the count-generating process, and should return a score that estimates a **fixed population quantity** — not a score defined only relative to a trend that shifts with the dataset's gene composition.
-
-- **PLit** operationalizes this via a *parametric null model*: it scores each gene by how much better its empirical distribution is explained by itself than by that null — a two-part MDL codelength gap that reduces to a penalized empirical KL divergence.
-- **ReThiN** operationalizes this via a *count family closed under thinning*: it scores each gene by how reproducible its expression pattern is across two independently thinned halves of the data — a statistic that estimates a variance-components ratio.
-
-Both are deployed inside the identical subsampling stability wrapper, so any performance difference observed in benchmarking reflects the discriminative power of the two proposed estimands, not an artifact of the evaluation protocol.
-
-## Methodology
-
-### Proposed Methods
-
-**PLit (Parametric Length Information Test).** For each gene, PLit fits a parametric null model by maximum likelihood — Poisson (1 parameter) or Negative Binomial (2 parameters: mean + dispersion) — and compares its fitted log-likelihood against a fully empirical (saturated) log-likelihood built from the gene's observed count frequencies. Following Rissanen's (1978) two-part MDL construction, the empirical model is charged a complexity penalty proportional to its number of distinct observed count values. The unpenalized score is exactly `n × KL(empirical distribution ‖ fitted null)` — a penalized estimate of how far a gene's expression departs from its best-fitting null.
-
-**ReThiN (Reproducibility via Thinning).** For each gene, ReThiN randomly splits every observed count into two independent halves using a fair thinning operator — Binomial(·, 0.5) for Poisson, Beta-Binomial for Negative Binomial — normalizes each half within-cell, and computes the correlation between the two halves across cells. This split-half correlation is a finite-sample estimate of a population variance-components ratio, `σ² / (σ² + 4w̄)`, that is exactly zero for genes whose variability is pure sampling noise and increases monotonically with genuine biological signal.
-
-Both statistics generalize beyond Poisson and NB — PLit to any parametric count model, ReThiN to any convolution-closed count family.
-
-### Benchmarking Protocol
-
-Every method — proposed and baseline — is passed through an identical subsampling-and-aggregation wrapper, so any performance difference reflects the underlying score rather than the evaluation procedure:
-
-1. Filter genes expressed in < 10 cells; compute library-size normalization factors once on the filtered matrix.
-2. For 5 independent seeds, run 20 rounds of 80%-cell subsampling (**without replacement**); apply each method's core score per round and aggregate the 20 rankings by average rank.
-3. For each feature budget K ∈ {100, 200, 500, 1000}, select the top-K genes, log-normalize, run PCA (15 PCs), and cluster with *k*-means (30 seeds × 25 restarts) using the true number of populations.
-4. Report mean ± SD of ARI and NMI over the 5 subsampling seeds.
-
-> **Note on terminology:** the wrapper uses **80% subsampling without replacement**, which is *subsampling* (not bootstrap resampling). It is inspired by stability selection (Meinshausen & Bühlmann, 2010; Shah & Samworth, 2013) but does **not** reproduce their complementary-pairs procedure, so their formal false-selection guarantees do **not** apply to these benchmark numbers. The stability layer here is a variance-reduction/fair-comparison device, not an error-control guarantee.
-
-### Methods Compared
-
-| Method | Statistical Model | Input | Hyperparameters | Estimand |
+| Method | Statistical model | Input | Tuning parameters | What the score targets |
 |---|---|---|---|---|
-| **PLit** † | Parametric null vs. empirical (MDL) | Raw counts | None | Penalised KL divergence from best-fit null |
-| **ReThiN** † | Thinning + split-half correlation | Raw counts | n_thin | Variance ratio σ² / (σ² + 4w̄) |
-| scran HVG | Mean–variance trend (LOESS) | Log-normalised | Trend span | None (residual above fitted trend) |
-| Seurat VST | Mean–variance trend (LOESS) | Raw counts | Span, clip threshold | None (clipped standardised variance) |
-| scry Deviance | Constant-proportion multinomial null | Raw counts | None | Multinomial deviance (unpenalised LR) |
-| Pearson Residuals | Poisson/NB null, fixed overdispersion | Raw counts | Overdispersion const. | Residual variance (depth-corrected) |
-| M3Drop | Michaelis–Menten dropout | Raw counts | None | None (dropout-vs-mean deviation) |
+| **PLit (Poisson)** † | Poisson null vs. empirical distribution (MDL) | Raw counts | None | Penalized KL divergence from the fitted null |
+| **PLit (NB)** † | NB null vs. empirical distribution (MDL) | Raw counts | None | Penalized KL divergence from the fitted null |
+| **ReThiN** † | Poisson thinning + split-half correlation | Raw counts | n_thin | σ² / (σ² + 2μ) |
+| scran HVG | Mean–variance trend | Log-normalized | Trend settings | Variance above the fitted trend |
+| Seurat VST | LOESS of log-variance on log-mean | Raw counts | Span, clip value | Clipped standardized variance |
+| scry Deviance | Constant-proportion (binomial) null | Raw counts | None | Unpenalized deviance |
+| Pearson residuals | NB null with depth offset, fixed θ = 100 | Raw counts | θ | Residual variance |
+| M3Drop | Michaelis–Menten dropout model | Raw counts | None | Excess zeros for a gene's mean |
 
 † Proposed method.
 
-### Benchmark Datasets
+## Theory
 
-| # | Dataset | System | Cells | Cell Types | Platform |
-|---|---|---|---|---|---|
-| 1 | Baron | Human pancreas | 8,569 | 13 | inDrop |
-| 2 | Tian CellBench | Human cell lines | 895 | 3 | 10x Chromium |
-| 3 | Zhengmix4eq | PBMC | 3,994 | 4 | 10x Chromium |
-| 4 | Zhengmix8eq | PBMC | 3,994 | 8 | 10x Chromium |
-| 5 | Segerstolpe | Human pancreas | 2,209 | 14 | Smart-seq2 |
-| 6 | Darmanis | Human brain | 420 | 8 | Fluidigm C1 |
-| 7 | Zeisel | Mouse cortex & hippocampus | 3,005 | 9 | STRT-Seq |
+**PLit.** With $V_j$ distinct observed counts and a null with $d_0$ parameters,
 
-*Ground-truth quality varies: Tian CellBench (cell lines mixed by design) is experimentally fixed; Zhengmix4eq/8eq are kit-purified PBMCs computationally mixed in known proportions (not FACS-sorted); Baron, Segerstolpe, Darmanis, and Zeisel provide expert-curated marker-based annotations, so agreement on these should be read against a curated computational reference rather than an independently measured identity.*
+$$S_j = n\,\widehat{\mathrm{KL}}\left(\hat p_j \,\middle\|\, f(\cdot;\hat\theta_j)\right) - \frac{(V_j-1)-d_0}{2}\ln n .$$
 
-## Theoretical Results
-
-Both scores reduce to closed-form population quantities. (Renders as math on GitHub.)
-
-**PLit** — penalized empirical KL divergence from the fitted null, where $V_j$ = number of distinct observed counts and $d_0$ = number of null parameters:
-
-$$S_j = n\,\widehat{\mathrm{KL}}\left(\hat p\middle\| f(\cdot;\hat\theta_j)\right) - \frac{(V_j-1)-d_0}{2} \ln(n)$$
-
-| Instance | Penalty term | Null parameters |
+| Instance | Penalty | Null parameters |
 |---|---|---|
-| Poisson ($d_0=1$) | $\tfrac{V_j-2}{2}\ln n$ | rate $\lambda_j$ |
-| Negative Binomial ($d_0=2$) | $\tfrac{V_j-3}{2}\ln n$ | mean $\mu_j$, dispersion $r_j$ |
+| Poisson ($d_0 = 1$) | $\tfrac{V_j-2}{2}\ln n$ | rate $\lambda_j$ |
+| Negative binomial ($d_0 = 2$) | $\tfrac{V_j-3}{2}\ln n$ | mean $\mu_j$, size $r_j$ |
 
-**ReThiN** — split-half correlation of two thinned halves, an estimate of a variance-components ratio ($\tilde\sigma_j^2$ = biological signal, $\bar w_j$ = mean thinning-noise floor):
+**ReThiN.** If $X \mid Z \sim \mathrm{Poisson}(\mu_Z)$ and the two halves are obtained by Binomial(·, ½) thinning, then, with $\mu_j$ and $\sigma_j^2$ the mean and between-cell variance of a gene's expected expression,
 
-$$\mathrm{Corr}(A_{ji}, B_{ji}) = \frac{\tilde\sigma_j^2}{\tilde\sigma_j^2 + 4\bar w_j}$$
+$$\mathrm{Corr}(A_{ji}, B_{ji}) = \frac{\sigma_j^2}{\sigma_j^2 + 2\mu_j}.$$
 
-| Instance | Closed form |
-|---|---|
-| Poisson | $\dfrac{\sigma_j^2}{\sigma_j^2 + 2\mu_j}$ |
-| Negative Binomial | $\dfrac{\tilde\sigma_j^2}{\tilde\sigma_j^2 + 2\mu_j + \frac{2}{r_j}\,\mathbb{E}[\mu_{ji}^2]}$ |
+This is zero exactly when the gene's expected expression does not vary between cells ($\sigma_j^2 = 0$), and it increases with $\sigma_j^2/\mu_j$. The identity holds for the halves before normalization under constant expected depth. The implemented score normalizes within each cell, so it approximates this quantity; no finite-depth error bound is given.
 
-The correlation is exactly **0** when a gene's variability is pure sampling noise ($\sigma_j^2 = 0$) and rises monotonically with the biological signal-to-noise ratio. The ReThiN identities are derived for unnormalized counts under an idealized uniform-depth assumption; in practice ReThiN normalizes within-cell, so the implemented statistic is an **approximation** to these population identities (see [Limitations](#limitations)).
+Full derivations are in the appendix of the manuscript.
+
+## Benchmark setup
+
+1. Remove genes expressed in fewer than 10 cells, then compute library-size factors once on the filtered matrix.
+2. For each of 5 subsampling seeds, draw 20 subsamples of 80% of the cells **without replacement**. Score genes on each subsample and aggregate the 20 rankings by average rank. Every method receives the same subsamples.
+3. For each budget K ∈ {100, 200, 500, 1000}, take the top-K genes, log-normalize, keep 15 principal components, and run *k*-means with the true number of populations (30 seeds × 25 restarts).
+4. Report the mean ± SD of ARI and NMI over the 5 subsampling seeds.
+
+> The wrapper is inspired by stability selection, but it aggregates ranks over 80% subsamples. The false-selection guarantees of stability selection therefore do **not** apply; the wrapper is a variance-reduction and fair-comparison device.
+
+### Datasets
+
+| # | Dataset | System | Genes* | Cells | Types | Platform | Counts | Ground truth |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Baron | Human pancreas | 15,117 | 8,569 | 14 | inDrop | UMI | Marker-validated clustering |
+| 2 | Tian (CellBench) | Human cell lines | 16,208 | 902 | 3 | 10x Chromium | UMI | Pure cell-line identity |
+| 3 | Zhengmix4eq | PBMC | 10,434 | 3,994 | 4 | 10x Chromium | UMI | Kit-purified, computationally mixed |
+| 4 | Zhengmix8eq | PBMC | 10,600 | 3,994 | 8 | 10x Chromium | UMI | Kit-purified, computationally mixed |
+| 5 | Zeisel | Mouse cortex & hippocampus | 16,484 | 3,005 | 7 | STRT-Seq | UMI | Marker-based expert annotation |
+| 6 | Segerstolpe | Human pancreas | 18,992 | 2,209 | 14 | Smart-seq2 | Reads | Marker-based expert annotation |
+| 7 | Darmanis | Human brain | 15,102 | 285 | 6 | Fluidigm C1 | Reads | Marker-based expert annotation |
+
+\* After removing genes expressed in fewer than 10 cells.
 
 ## Results
 
-For each dataset, the table below shows which methods achieve the best **ARI** (top 3) and best **NMI** (top 1), using each method's **best score across all four feature budgets** (K = 100, 200, 500, 1000) tested, excluding the random baseline. The four rightmost columns show where PLit and ReThiN — under their Poisson and NB instances — land in that ranking.
+<div align="center">
+<img src="figures/fig_rank_summary.png" alt="Rank of each method within each dataset and budget" width="100%"/>
+</div>
 
-> ⚠️ **Read this as a "best-case per method" view.** Taking each method's best budget flatters *every* method equally (it is applied to baselines too), so it is a fair *relative* comparison but an optimistic *absolute* one. The [Aggregate Ranking](#aggregate-ranking-across-all-7-datasets) below, which averages *across* budgets, is the more conservative summary.
+*Rank of each method (1 = best; random baseline excluded) within each dataset and budget, for ARI (top) and NMI (bottom). Datasets left of the black line contain UMI counts, those to the right read counts. The last column is the mean rank over all 28 dataset–budget combinations.*
 
-**Legend:** 💯 = ranked **#1** on ARI or NMI for that dataset · ✅ = ranked in the **top 3** on ARI or NMI (or tied for the dataset's best) · — = outside the top 3 on both metrics
+### Mean rank across datasets and budgets
 
-<table>
-<thead>
-<tr>
-<th>Dataset</th>
-<th>🥇🥈🥉 Top 3 ARI</th>
-<th>🥇🥈🥉 Top 3 NMI</th>
-<th>PLit (Poisson)</th>
-<th>PLit (NB)</th>
-<th>ReThiN (Poisson)</th>
-<th>ReThiN (NB)</th>
-</tr>
-</thead>
-<tbody>
-<!-- Segerstolpe -->
-<tr>
-<td rowspan="3"><b>Segerstolpe</b><br>(Human Pancreas)</td>
-<td>🥇 PLit (NB) — 0.625</td>
-<td>🥇 ReThiN (Poisson) — 0.707</td>
-<td rowspan="3" align="center">—</td>
-<td rowspan="3" align="center">💯<br>0.625 ARI<br>(K=1000)</td>
-<td rowspan="3" align="center">💯<br>0.707 NMI<br>(K=1000)</td>
-<td rowspan="3" align="center">—</td>
-</tr>
-<tr>
-<td>🥈 ReThiN (Poisson) — 0.564</td>
-<td>🥈 PLit (NB) — 0.696</td>
-</tr>
-<tr>
-<td>🥉 Seurat VST — 0.534</td>
-<td>🥉 Seurat VST — 0.689</td>
-</tr>
-<!-- Darmanis -->
-<tr>
-<td rowspan="3"><b>Darmanis</b><br>(Human Brain)</td>
-<td>🥇 ReThiN (Poisson) — 0.921</td>
-<td>🥇 ReThiN (Poisson) — 0.882</td>
-<td rowspan="3" align="center">—</td>
-<td rowspan="3" align="center">✅<br>0.902 ARI · 0.847 NMI<br>(K=1000)</td>
-<td rowspan="3" align="center">💯<br>0.921 ARI · 0.882 NMI<br>(K=1000)</td>
-<td rowspan="3" align="center">—</td>
-</tr>
-<tr>
-<td>🥈 PLit (NB) — 0.902</td>
-<td>🥈 PLit (NB) — 0.847</td>
-</tr>
-<tr>
-<td>🥉 M3Drop — 0.881</td>
-<td>🥉 M3Drop — 0.832</td>
-</tr>
-<!-- Tian -->
-<tr>
-<td><b>Tian CellBench</b>†</td>
-<td>8-way tie at 0.997<br>(near-saturated)</td>
-<td>8-way tie at 0.993<br>(near-saturated)</td>
-<td align="center">✅<br>0.997, tied<br>(K=500)</td>
-<td align="center">—</td>
-<td align="center">✅<br>0.997, tied<br>(K=500)</td>
-<td align="center">✅<br>0.997, tied<br>(K=500)</td>
-</tr>
-<!-- Zhengmix4eq -->
-<tr>
-<td rowspan="3"><b>Zhengmix4eq</b></td>
-<td>🥇 scry Deviance — 0.930</td>
-<td>🥇 scry Deviance — 0.921</td>
-<td rowspan="3" align="center">✅<br>0.926 ARI · 0.918 NMI<br>(K=500/1000)</td>
-<td rowspan="3" align="center">—</td>
-<td rowspan="3" align="center">✅<br>0.907 ARI · 0.904 NMI<br>(K=1000)</td>
-<td rowspan="3" align="center">—</td>
-</tr>
-<tr>
-<td>🥈 PLit (Poisson) — 0.926</td>
-<td>🥈 PLit (Poisson) — 0.918</td>
-</tr>
-<tr>
-<td>🥉 ReThiN (Poisson) — 0.907</td>
-<td>🥉 ReThiN (Poisson) — 0.904</td>
-</tr>
-<!-- Zhengmix8eq -->
-<tr>
-<td rowspan="3"><b>Zhengmix8eq</b></td>
-<td>🥇 scry Deviance — 0.666</td>
-<td>🥇 scry Deviance — 0.752</td>
-<td rowspan="3" align="center">✅<br>0.664 ARI · 0.746 NMI<br>(K=500/1000)</td>
-<td rowspan="3" align="center">—</td>
-<td rowspan="3" align="center">✅<br>0.651 ARI · 0.737 NMI<br>(K=1000)</td>
-<td rowspan="3" align="center">—</td>
-</tr>
-<tr>
-<td>🥈 PLit (Poisson) — 0.664</td>
-<td>🥈 PLit (Poisson) — 0.746</td>
-</tr>
-<tr>
-<td>🥉 ReThiN (Poisson) — 0.651</td>
-<td>🥉 ReThiN (Poisson) — 0.737</td>
-</tr>
-<!-- Baron -->
-<tr>
-<td rowspan="3"><b>Baron</b><br>(Human Pancreas)</td>
-<td>🥇 Seurat VST — 0.619</td>
-<td>🥇 Seurat VST — 0.703</td>
-<td rowspan="3" align="center">✅<br>0.579 ARI<br>(K=500)</td>
-<td rowspan="3" align="center">—</td>
-<td rowspan="3" align="center">✅<br>0.583 ARI · 0.686 NMI<br>(K=500/1000)</td>
-<td rowspan="3" align="center">—</td>
-</tr>
-<tr>
-<td>🥈 ReThiN (Poisson) — 0.583</td>
-<td>🥈 Pearson Residuals — 0.690</td>
-</tr>
-<tr>
-<td>🥉 PLit (Poisson) — 0.579</td>
-<td>🥉 ReThiN (Poisson) — 0.686</td>
-</tr>
-<!-- Zeisel -->
-<tr>
-<td rowspan="3"><b>Zeisel</b><br>(Mouse Brain)</td>
-<td>🥇 Pearson Residuals — 0.885</td>
-<td>🥇 ReThiN (Poisson) — 0.839</td>
-<td rowspan="3" align="center">—</td>
-<td rowspan="3" align="center">—</td>
-<td rowspan="3" align="center">💯<br>0.882 ARI · 0.839 NMI<br>(K=1000)</td>
-<td rowspan="3" align="center">—</td>
-</tr>
-<tr>
-<td>🥈 ReThiN (Poisson) — 0.882</td>
-<td>🥈 Pearson Residuals — 0.838</td>
-</tr>
-<tr>
-<td>🥉 M3Drop — 0.871</td>
-<td>🥉 M3Drop — 0.820</td>
-</tr>
-</tbody>
-</table>
-
-† *Tian CellBench saturates quickly: by K ≥ 200, nearly every method reaches ARI ≈ 0.997 / NMI ≈ 0.993, so it does not meaningfully discriminate between selectors. PLit-NB plateaus at 0.990 / 0.981 and is the one method outside the 8-way tie.*
-
-### Aggregate Ranking Across All 7 Datasets
-
-Averaging each method's ARI/NMI across feature budgets, then ranking the 7 methods per dataset (1 = best), and averaging ranks across all 7 datasets. **The Poisson and NB columns each rank the five baselines together with the corresponding instance of the proposed methods** — so this shows, honestly, how the two proposed instances fare against the field:
-
-| Method | Poisson — ARI | Poisson — NMI | NB — ARI | NB — NMI |
+| Method | ARI (all 7) | NMI (all 7) | ARI, UMI (4 informative) | ARI, read counts (2) |
 |---|---|---|---|---|
-| **ReThiN** † | **2.57** 🥇 | **2.71** 🥇 | 6.57 | 6.57 |
-| M3Drop | 3.14 | 3.00 | **2.71** 🥇 | **2.57** 🥇 |
-| **PLit** † | 3.57 | 3.79 | 4.71 | 4.86 |
-| scry Deviance | 3.71 | 3.43 | 3.00 | 2.86 |
-| scran HVG | 4.64 | 4.21 | 3.21 | 3.07 |
-| Pearson Residuals | 4.79 | 4.57 | 3.36 | 3.36 |
-| Seurat VST | 5.57 | 6.29 | 4.43 | 4.71 |
+| **ReThiN** † | **3.20** 🥇 | **3.12** 🥇 | 3.31 | 2.69 |
+| scry Deviance | 3.91 | 3.73 | 3.31 | 4.38 |
+| **PLit (Poisson)** † | 4.09 | 4.21 | 3.38 | 5.62 |
+| M3Drop | 4.21 | 3.84 | 4.81 | 3.81 |
+| Pearson residuals | 4.61 | 4.82 | 4.06 | 6.06 |
+| scran HVG | 5.00 | 4.84 | 4.19 | 7.19 |
+| Seurat VST | 5.27 | 5.52 | 5.38 | 5.00 |
+| **PLit (NB)** † | 5.71 | 5.91 | 7.56 | **1.25** 🥇 |
 
-† Proposed method. *(Rank 1 = best; the seven ranks sum to 28 in each column.)*
+† Proposed method. Ranks are among the eight methods (1 = best), with ties given the average rank. Leaving out Tian, where all methods are at ceiling, does not change the order.
 
-**Reading it straight:** under the **Poisson** instance ReThiN is 1st and PLit is 3rd; under the **NB** instance the same two methods drop to **last (6.57)** and **second-to-last (4.71)**, and M3Drop takes the top spot. The Poisson methods are the result to take away; the NB instances are an honest negative.
+### Per dataset (mean ARI rank over the four budgets)
 
-> **A note on significance:** with only 7 benchmark datasets, pairwise significance tests are underpowered. Dataset-level bootstrap confidence intervals (10,000 resamples) show only **two** comparisons excluding zero on both metrics: **ReThiN over Seurat VST** and **ReThiN over Pearson Residuals**. PLit additionally shows a small but statistically supported **deficit vs. scry Deviance on NMI**. All other differences reported above — including PLit's and ReThiN's other wins — are directionally consistent point estimates, not certified effects at this sample size. See the manuscript for full CI tables.
+| Dataset | Counts | Top three | PLit (Poisson) | PLit (NB) | ReThiN |
+|---|---|---|---|---|---|
+| Zhengmix4eq | UMI | scry Deviance, PLit (Poisson), ReThiN | 1.75 | 6.50 | 3.25 |
+| Zhengmix8eq | UMI | scry Deviance, PLit (Poisson), ReThiN | 2.00 | 8.00 | 3.50 |
+| Baron | UMI | Pearson residuals, Seurat VST, ReThiN | 4.75 | 7.75 | 3.25 |
+| Zeisel | UMI | M3Drop, scran HVG, ReThiN | 5.00 | 8.00 | 3.25 |
+| Tian‡ | UMI | M3Drop, ReThiN, then a three-way tie (PLit (Poisson), Pearson residuals, scran HVG) | 3.88 | 7.25 | 3.75 |
+| Segerstolpe | Reads | PLit (NB), ReThiN, M3Drop | 5.50 | **1.00** | 2.62 |
+| Darmanis | Reads | PLit (NB), ReThiN, Seurat VST | 5.75 | **1.50** | 2.75 |
+
+‡ Tian is at ceiling: every informed method reaches ARI ≥ 0.987 at every budget, and even random selection reaches ARI ≥ 0.969, so its ranks reflect differences of at most 0.02.
+
+Per-dataset tables (mean ± SD at every budget) and ARI/NMI curves are in the manuscript and in the repository's output folders.
 
 ## Limitations
 
-- **Approximate normalization in ReThiN.** The split-half correlation identities assume unnormalized counts under uniform sequencing depth; the implementation normalizes within-cell, so the theory is an approximation and no finite-sample error bound is established yet.
-- **The NB extension underperforms.** It is a clean derivation but, empirically, usually worse than the Poisson version (ReThiN-NB especially). It should be read as a proof-of-concept for the generalization, not a recommended default.
-- **Benchmarking ≠ error-controlled deployment.** The 80% subsampling wrapper enables fair comparison but does not carry the formal false-selection guarantees of complementary-pairs stability selection.
-- **Evaluation scope.** Methods are assessed only through downstream *k*-means clustering (ARI/NMI). Trajectory inference, differential expression, cell-type annotation, and deep-learning pipelines are untested.
-- **Small benchmark.** Seven datasets limit statistical power; most cross-method differences are directional rather than certified.
+- **Sequencing depth.** Both methods assume the same expected total count in every cell. Neither models depth explicitly, and ReThiN's within-cell normalization is an approximation without a finite-depth error bound.
+- **Choice of null.** The Poisson null worked best on UMI counts and the NB null on read counts, so the null must be chosen from the sequencing protocol. The read-count evidence rests on two datasets.
+- **ReThiN on read counts.** ReThiN's zero-correlation guarantee requires Poisson noise, which read counts violate. It still ranked among the best methods on both read-count datasets, but this is not guaranteed in general.
+- **Batch and donor effects.** Neither method separates biological variation from differences between batches or donors.
+- **Evaluation scope.** Methods are assessed only through *k*-means clustering with the true number of populations (ARI/NMI), on seven datasets. Differences are descriptive and not statistically tested.
+
+To reproduce the benchmark:
+
+```bash
+git clone https://github.com/MaitreyaGanu/PLit-ReThiN.git
+cd PLit-ReThiN
+```
+
+```r
+# Core dependencies (see the repository for the complete list)
+install.packages(c("Matrix", "MASS", "dplyr", "ggplot2"))
+if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+BiocManager::install(c("SingleCellExperiment", "scuttle", "scran", "scry", "M3Drop"))
+install.packages("Seurat")
+```
+
+Each dataset has a Poisson script (PLit (Poisson), ReThiN and the baselines) and an NB script (PLit (NB) and the baselines). Each script writes `benchmark_summary_<dataset>.csv`, `raw_results_<dataset>.csv` and `runtime_<dataset>.csv`.
 
 ## Metrics
 
-- **ARI (Adjusted Rand Index):** agreement between predicted clusters and ground-truth labels, corrected for chance. 1 = perfect, ~0 = random.
-- **NMI (Normalized Mutual Information):** shared information between clusters and labels, normalized to [0, 1]. Higher = better.
+- **ARI (Adjusted Rand Index):** agreement between predicted clusters and ground-truth labels, corrected for chance. 1 = perfect, about 0 = random.
+- **NMI (Normalized Mutual Information):** information shared between clusters and labels, normalized to [0, 1]. Higher is better.
 
-## Repository
+## ⭐ Star history
 
-All code, benchmarking scripts, and processed datasets used in this project are available at:
+<a href="https://star-history.com/#MaitreyaGanu/PLit-ReThiN&Date">
+  <img src="https://api.star-history.com/svg?repos=MaitreyaGanu/PLit-ReThiN&type=Date" alt="Star history chart" width="600"/>
+</a>
 
-🔗 **https://github.com/MaitreyaGanu/PLit-ReThiN**
-
-See the repository for the per-dataset entry points, the shared subsampling wrapper, and the exact package/version dependencies.
-
-## Usage
-
-```r
-# Clone the repository
-git clone https://github.com/MaitreyaGanu/PLit-ReThiN.git
-cd PLit-ReThiN
-
-# Core R dependencies (see the repo for the authoritative, complete list)
-install.packages(c("Matrix", "MASS"))
-if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-BiocManager::install(c("scran", "scry", "M3Drop", "Seurat"))
-
-# Run the benchmarking pipeline
-# (see repository for dataset-specific entry points and the shared subsampling wrapper)
-```
 ---
 
 <div align="center">
-<sub><b>Status:</b> manuscript in preparation • author affiliations to be finalized • results reproduce from the scripts in this repository.</sub>
+<sub><b>Status:</b> manuscript in preparation • results reproduce from the scripts in this repository.</sub>
 </div>
