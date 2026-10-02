@@ -122,8 +122,9 @@ Full derivations are in the appendix of the manuscript.
 ## Results
 
 <div align="center">
-<img src="combined%20summary/fig_rank_summary.png" alt="Rank of each method within each dataset and budget" width="100%"/>
-</div>
+<img src="https://raw.githubusercontent.com/MaitreyaGanu/PLit-ReThiN/main/combined%20summary/fig_rank_summary.png"
+     alt="Rank of each method within each dataset and budget"
+     width="100%"></div>
 
 *Rank of each method (1 = best; random baseline excluded) within each dataset and budget, for ARI (top) and NMI (bottom). Datasets left of the black line contain UMI counts, those to the right read counts. The last column is the mean rank over all 28 dataset–budget combinations.*
 
