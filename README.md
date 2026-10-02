@@ -14,7 +14,6 @@ Advisor: **Dr. Clint P. George**<br>
 
 <a href="https://github.com/MaitreyaGanu/PLit-ReThiN/stargazers"><img src="https://img.shields.io/github/stars/MaitreyaGanu/PLit-ReThiN?style=for-the-badge&logo=github&color=gold" alt="GitHub stars"/></a>
 <img src="https://img.shields.io/badge/Language-R-276DC3?style=for-the-badge&logo=r&logoColor=white" alt="R"/>
-<img src="https://img.shields.io/badge/Package-StaBITUFS-blueviolet?style=for-the-badge&logo=r&logoColor=white" alt="StaBITUFS"/>
 <img src="https://img.shields.io/badge/Field-Bioinformatics-00758F?style=for-the-badge" alt="Bioinformatics"/>
 <img src="https://img.shields.io/badge/Topic-Unsupervised%20Feature%20Selection-orange?style=for-the-badge" alt="Unsupervised feature selection"/>
 <img src="https://img.shields.io/badge/Status-Manuscript%20in%20Preparation-yellow?style=for-the-badge" alt="Status"/>
@@ -123,7 +122,7 @@ Full derivations are in the appendix of the manuscript.
 ## Results
 
 <div align="center">
-<img src="figures/fig_rank_summary.png" alt="Rank of each method within each dataset and budget" width="100%"/>
+<img src="combined summary/fig_rank_summary.png" alt="Rank of each method within each dataset and budget" width="100%"/>
 </div>
 
 *Rank of each method (1 = best; random baseline excluded) within each dataset and budget, for ARI (top) and NMI (bottom). Datasets left of the black line contain UMI counts, those to the right read counts. The last column is the mean rank over all 28 dataset–budget combinations.*
