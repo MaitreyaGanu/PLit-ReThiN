@@ -10,8 +10,6 @@ Advisor: **Dr. Clint P. George**<br>
 *Indian Institute of Technology (IIT) Goa*
 
 <br>
-
-<a href="https://github.com/MaitreyaGanu/PLit-ReThiN/stargazers"><img src="https://img.shields.io/github/stars/MaitreyaGanu/PLit-ReThiN?style=for-the-badge&logo=github&color=gold" alt="GitHub stars"/></a>
 <img src="https://img.shields.io/badge/Language-R-276DC3?style=for-the-badge&logo=r&logoColor=white" alt="R"/>
 <img src="https://img.shields.io/badge/Field-Bioinformatics-00758F?style=for-the-badge" alt="Bioinformatics"/>
 <img src="https://img.shields.io/badge/Topic-Unsupervised%20Feature%20Selection-orange?style=for-the-badge" alt="Unsupervised feature selection"/>
@@ -186,15 +184,3 @@ Each dataset has a Poisson script (PLit (Poisson), ReThiN and the baselines) and
 
 - **ARI (Adjusted Rand Index):** agreement between predicted clusters and ground-truth labels, corrected for chance. 1 = perfect, about 0 = random.
 - **NMI (Normalized Mutual Information):** information shared between clusters and labels, normalized to [0, 1]. Higher is better.
-
-## ⭐ Star history
-
-<a href="https://star-history.com/#MaitreyaGanu/PLit-ReThiN&Date">
-  <img src="https://api.star-history.com/svg?repos=MaitreyaGanu/PLit-ReThiN&type=Date" alt="Star history chart" width="600"/>
-</a>
-
----
-
-<div align="center">
-<sub><b>Status:</b> manuscript in preparation • results reproduce from the scripts in this repository.</sub>
-</div>
